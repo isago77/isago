@@ -31,7 +31,7 @@ services:
 
   liquibase:
     container_name: MariaDB-Liquibase
-    image: liquibase/liquibase:4.30
+    image: liquibase/liquibase:4.32
     depends_on:
       mariaDB: # 관련 DB가 모두 초기화된 이후 로드 시도.
         condition: service_healthy

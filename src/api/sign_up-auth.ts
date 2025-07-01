@@ -10,7 +10,7 @@ import { randomBytes } from "crypto";
 
 /** 서버 측에서 정의한 회원가입 요청 정보에 대한 데이터 형태. */
 const SignUpAuth = SignUpRequest.extend({
-    "numbers": z.string()
+    numbers: z.string()
 });
 
 class SignUpAuthError {

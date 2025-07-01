@@ -11,6 +11,7 @@
     "@types/nodemailer": "^6.4.16",
     "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
+    "axios": "^1.10.0",
     "cookie": "^1.0.1",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",

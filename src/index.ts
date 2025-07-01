@@ -10,6 +10,8 @@ import { SIGN_IN_REISSUE_HANDLER } from "./api/sign_in-reissue";
 import { SIGN_IN_HANDLER } from "./api/sign_in";
 import { RESET_PASSWORD_HANDLER } from "./api/reset_password";
 import { RESET_PASSWORD_AUTH_HANDLER } from "./api/reset_password-auth";
+import { SIGN_IN_OAUTH_HANDLER } from "./api/sign_in-oauth";
+import { SIGN_UP_OAUTH_HANDLER } from "./api/sign_up-oauth";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -38,10 +40,12 @@ export const REDIS_CLIENT = createClient({
 // reset-password/auth
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
-        new HTTPRouter("auth", SIGN_UP_AUTH_HANDLER)
+        new HTTPRouter("auth", SIGN_UP_AUTH_HANDLER),
+        new HTTPRouter("oauth", SIGN_UP_OAUTH_HANDLER),
     ]),
     new HTTPRouter("sign-in", SIGN_IN_HANDLER, [
-        new HTTPRouter("reissue", SIGN_IN_REISSUE_HANDLER)
+        new HTTPRouter("reissue", SIGN_IN_REISSUE_HANDLER),
+        new HTTPRouter("oauth", SIGN_IN_OAUTH_HANDLER)
     ]),
     new HTTPRouter("reset-password", RESET_PASSWORD_HANDLER, [
         new HTTPRouter("auth", RESET_PASSWORD_AUTH_HANDLER)

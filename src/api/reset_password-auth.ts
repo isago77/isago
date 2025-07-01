@@ -9,8 +9,8 @@ import { randomBytes } from "crypto";
 
 /** 서버 측에서 정의한 비밀번호 변경 요청 정보에 대한 데이터 형태. */
 const ResetPasswordAuth = z.object({
-    "userId": z.string(),
-    "numbers": z.string()
+    userId: z.string(),
+    numbers: z.string()
 });
 
 const ResetPasswordAuthRequest = z.object({
