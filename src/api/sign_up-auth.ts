@@ -1,0 +1,69 @@
+import { z } from "zod";
+import { HTTPHandler } from "../core/http_handler";
+import { APILength } from "./components/api_length";
+import { Auth } from "./components/auth";
+import { API } from "./components/api";
+import { DB_CLIENT, REDIS_CLIENT } from "..";
+import { APIError } from "./components/api_error";
+import { SignUpRequest, validSignUpRequest } from "./sign_up";
+import { randomBytes } from "crypto";
+
+/** 서버 측에서 정의한 회원가입 요청 정보에 대한 데이터 형태. */
+const SignUpAuth = SignUpRequest.extend({
+    "numbers": z.string()
+});
+
+class SignUpAuthError {
+    /** 유효하지 않은 인증 번호를 요청했을 때. */
+    static INVALID_AUTH_NUMBERS = new APIError("INVALID_AUTH_NUMBERS", 400);
+}
+
+export const SignUpAuthRequest = z.object({
+    uuid: z.string().min(APILength.uuid).max(APILength.uuid),
+    numbers: z.string().min(Auth.LENGTH).max(Auth.LENGTH)
+});
+
+// sign-up/auth
+export const SIGN_UP_AUTH_HANDLER = new HTTPHandler({
+    post: async (_, response, body) => {
+        const given = API.tryParse(SignUpAuthRequest, body);
+
+        const rawInfo = await REDIS_CLIENT.hGet("SignUpAuth", given.uuid);
+        if (!rawInfo) throw APIError.INVALID_UUID;
+
+        const info = API.tryParse(SignUpAuth, rawInfo);
+        await validSignUpRequest(info);
+
+        // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.
+        if (given.numbers != info.numbers) {
+            throw SignUpAuthError.INVALID_AUTH_NUMBERS;
+        }
+
+        const userId = API.createUUID();
+        const email = info.email;
+        const displayName = info.displayName;
+        const passSalt = Auth.hashAsBase64("sha256", randomBytes(128));
+        const password = Auth.hashAsBase64("sha512", info.password + passSalt);
+
+        const fields = [
+            "id",
+            "email",
+            "displayName",
+            "phoneNumber",
+            "password",
+            "passwordSalt",
+            "marketingAccepted"
+        ];
+
+        await DB_CLIENT.query(
+            `INSERT INTO User(${fields.join(", ")}) VALUES(${fields.map(_ => "?").join(", ")})`,
+            [userId, email, displayName, info.phoneNumber, password, passSalt, info.marketingAccepted]
+        );
+
+        // 회원가입 작업이 최종적으로 완료되었으므로 인증 번호에 대한 UUID이(가) 만료되어야 함.
+        await REDIS_CLIENT.hDel("SignUpAuth", given.uuid);
+        const issuedToken = await Auth.issueToken(userId);
+
+        API.success(response, issuedToken);
+    }
+});

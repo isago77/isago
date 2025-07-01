@@ -1,0 +1,45 @@
+name: isago
+services:
+  mariaDB:
+    container_name: MariaDB
+    image: yobasystems/alpine-mariadb:11.4.5
+    restart: always
+    volumes:
+      - ./db/mariaDB:/var/lib/mysql
+    ports:
+      - "${MARIADB_PORT}:3306"
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u ${MARIADB_USER} -p${MARIADB_PASSWORD}"]
+      interval: 1s
+      timeout: 1s
+      retries: 30 # 재시도 30s
+
+  redis:
+    container_name: Redis
+    image: redis:7.4-alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./db/redis/data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "${REDIS_PORT}:6379"
+
+  liquibase:
+    container_name: MariaDB-Liquibase
+    image: liquibase/liquibase:4.30
+    depends_on:
+      mariaDB: # 관련 DB가 모두 초기화된 이후 로드 시도.
+        condition: service_healthy
+    volumes:
+      - ./liquibase/changelog:/liquibase/changelog
+    command: >
+      --changeLogFile=/changelog/changelog-config.yml
+      --url=jdbc:mariadb://mariadb:3306/${MARIADB_DATABASE}
+      --username=${MARIADB_USER}
+      --password=${MARIADB_PASSWORD}
+      update
