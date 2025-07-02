@@ -14,6 +14,7 @@ import { SIGN_IN_OAUTH_HANDLER } from "./api/sign_in-oauth";
 import { SIGN_UP_OAUTH_HANDLER } from "./api/sign_up-oauth";
 import { PROFILE_HANDLER } from "./api/profile";
 import { API } from "./api/components/api";
+import { PROFILE_SELF_HANDLER } from "./api/profile-self";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -56,7 +57,9 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("reset-password", RESET_PASSWORD_HANDLER, [
         new HTTPRouter("auth", RESET_PASSWORD_AUTH_HANDLER)
     ]),
-    new HTTPRouter("profile", PROFILE_HANDLER)
+    new HTTPRouter("profile", PROFILE_HANDLER, [
+        new HTTPRouter("self", PROFILE_SELF_HANDLER)
+    ])
 ]);
 
 const server = http.createServer(async (request, response) => {

@@ -1,5 +1,14 @@
 import { BinaryLike, createHash, randomBytes } from "crypto";
 import { REDIS_CLIENT } from "../..";
+import * as http from "http";
+import { HTTPHandlerListener } from "../../core/http_handler";
+
+export type HTTPAuthHandlerListener = (
+    request: http.IncomingMessage,
+    response: http.ServerResponse,
+    requestBody: Buffer,
+    userId: string,
+) => Promise<void> | void;
 
 export class Auth {
     static LENGTH = 6;
@@ -38,5 +47,30 @@ export class Auth {
             .exec();
 
         return {accessToken, refreshToken};
+    }
+
+    /** 주어진 엑세스 토큰에 해당하는 사용자 아이디를 반환합니다. */
+    static async userIdOf(accessToken: string) {
+        return await REDIS_CLIENT.hGet("AccessToken", accessToken);
+    }
+
+    static delegate(listener: HTTPAuthHandlerListener): HTTPHandlerListener {
+        return async (request, response, body) => {
+            const accessToken = request.headers.authorization;
+            if (!accessToken) {
+                response.writeHead(401);
+                response.end();
+                return;
+            }
+
+            const userId = await this.userIdOf(accessToken);
+            if (!userId) {
+                response.writeHead(401);
+                response.end();
+                return;
+            }
+
+            listener(request, response, body, userId);
+        }
     }
 }
