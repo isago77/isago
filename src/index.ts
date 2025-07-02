@@ -12,6 +12,8 @@ import { RESET_PASSWORD_HANDLER } from "./api/reset_password";
 import { RESET_PASSWORD_AUTH_HANDLER } from "./api/reset_password-auth";
 import { SIGN_IN_OAUTH_HANDLER } from "./api/sign_in-oauth";
 import { SIGN_UP_OAUTH_HANDLER } from "./api/sign_up-oauth";
+import { PROFILE_HANDLER } from "./api/profile";
+import { API } from "./api/components/api";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -34,10 +36,14 @@ export const REDIS_CLIENT = createClient({
 
 // sign-up
 // sign-up/auth
+// sign-up/oauth
 // sign-in
 // sign-in/reissue
+// sign-in/oauth
 // reset-password
 // reset-password/auth
+// profile
+// profile/self
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
         new HTTPRouter("auth", SIGN_UP_AUTH_HANDLER),
@@ -49,7 +55,8 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
     new HTTPRouter("reset-password", RESET_PASSWORD_HANDLER, [
         new HTTPRouter("auth", RESET_PASSWORD_AUTH_HANDLER)
-    ])
+    ]),
+    new HTTPRouter("profile", PROFILE_HANDLER)
 ]);
 
 const server = http.createServer(async (request, response) => {
@@ -57,7 +64,7 @@ const server = http.createServer(async (request, response) => {
 
     try {
         HTTP_ROUTER.perform(new HTTPConnection(
-            request.url.split("/"),
+            API.urlOf(request).pathname.split("/"),
             request,
             response
         ));

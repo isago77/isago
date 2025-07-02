@@ -42,7 +42,7 @@ export async function validSignUpRequest(given: z.infer<typeof SignUpRequest>) {
 // sign-up
 export const SIGN_UP_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(SignUpRequest, body);
+        const given = API.tryParseJSON(SignUpRequest, body);
         await validSignUpRequest(given);
 
         const authUUID = API.createUUID();

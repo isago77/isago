@@ -18,7 +18,7 @@ class ResetPasswordError {
 // reset-password
 export const RESET_PASSWORD_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(ResetPasswordRequest, body);
+        const given = API.tryParseJSON(ResetPasswordRequest, body);
 
         const [row] = await DB_CLIENT.query(
             "SELECT id FROM User WHERE email = ?",

@@ -26,12 +26,12 @@ export const SignUpAuthRequest = z.object({
 // sign-up/auth
 export const SIGN_UP_AUTH_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(SignUpAuthRequest, body);
+        const given = API.tryParseJSON(SignUpAuthRequest, body);
 
         const rawInfo = await REDIS_CLIENT.hGet("SignUpAuth", given.uuid);
         if (!rawInfo) throw APIError.INVALID_UUID;
 
-        const info = API.tryParse(SignUpAuth, rawInfo);
+        const info = API.tryParseJSON(SignUpAuth, rawInfo);
         await validSignUpRequest(info);
 
         // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.

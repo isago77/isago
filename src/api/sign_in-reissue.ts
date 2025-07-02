@@ -19,7 +19,7 @@ class SignInReissueError {
 // sign-in/reissue
 export const SIGN_IN_REISSUE_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(SignInReissueRequest, body)
+        const given = API.tryParseJSON(SignInReissueRequest, body)
 
         // 유효한 리프레시 토큰이라면 사용자 아이디가 정의됨.
         const userId = await REDIS_CLIENT.hGet("RefreshToken", given.refreshToken);

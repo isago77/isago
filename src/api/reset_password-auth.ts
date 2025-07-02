@@ -33,12 +33,12 @@ class ResetPasswordAuthError {
 // reset-password/auth
 export const RESET_PASSWORD_AUTH_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(ResetPasswordAuthRequest, body);
+        const given = API.tryParseJSON(ResetPasswordAuthRequest, body);
 
         const rawInfo = await REDIS_CLIENT.hGet("ResetPasswordAuth", given.uuid);
         if (!rawInfo) throw APIError.INVALID_UUID;
 
-        const info = API.tryParse(ResetPasswordAuth, rawInfo);
+        const info = API.tryParseJSON(ResetPasswordAuth, rawInfo);
 
         // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.
         if (info.numbers != given.numbers) {

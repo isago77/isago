@@ -25,14 +25,14 @@ const SignUpOAuthRequest = z.object({
 // sign-up/oauth
 export const SIGN_UP_OAUTH_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(SignUpOAuthRequest, body);
+        const given = API.tryParseJSON(SignUpOAuthRequest, body);
 
         const rawInfo = await REDIS_CLIENT.hGet("SignUpOAuth", given.uuid);
 
         // 주어진 UUID이(가) 유효하지 않은 경우.
         if (!rawInfo) throw APIError.INVALID_UUID;
 
-        const info = API.tryParse(SignUpOAuth, rawInfo);
+        const info = API.tryParseJSON(SignUpOAuth, rawInfo);
         const userId = API.createUUID();
         const fields = [
             "id",

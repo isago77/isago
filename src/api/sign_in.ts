@@ -19,7 +19,7 @@ class SignInError {
 // sign-in
 export const SIGN_IN_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(SignInRequest, body);
+        const given = API.tryParseJSON(SignInRequest, body);
 
         const [row] = await DB_CLIENT.query(
             "SELECT id, password, passwordSalt FROM User WHERE email = ? LIMIT 1",

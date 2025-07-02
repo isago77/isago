@@ -75,7 +75,7 @@ class SignInOauthError {
 // sign-in/oauth
 export const SIGN_IN_OAUTH_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParse(SignInOauthRequest, body);
+        const given = API.tryParseJSON(SignInOauthRequest, body);
 
         // OAuth에 대한 사용자 아이디를 정의합니다.
         const providerUserId = await oauth(given.token, given.provider);
