@@ -11,6 +11,7 @@ const ProfileRequest = z.object({
         .max(APILength.uuid)
 });
 
+// profile
 export const PROFILE_HANDLER = new HTTPHandler({
     get: async (request, response, body) => {
         const given = API.tryParseURL(ProfileRequest, API.urlOf(request));

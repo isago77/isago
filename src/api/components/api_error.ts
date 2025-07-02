@@ -11,4 +11,5 @@ export class APIError {
 
     static INVALID_REQUEST_FORMAT = new APIError("INVALID_REQUEST_FORMAT", 400);
     static INVALID_UUID = new APIError("INVALID_UUID", 400);
+    static CANNOT_OAUTH = new APIError("CANNOT_OAUTH", 400);
 }

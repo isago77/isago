@@ -1,5 +1,5 @@
 import { BinaryLike, createHash, randomBytes } from "crypto";
-import { REDIS_CLIENT } from "../..";
+import { DB_CLIENT, REDIS_CLIENT } from "../..";
 import * as http from "http";
 import { HTTPHandlerListener } from "../../core/http_handler";
 
@@ -9,6 +9,14 @@ export type HTTPAuthHandlerListener = (
     requestBody: Buffer,
     userId: string,
 ) => Promise<void> | void;
+
+/** 사용자를 식별하는 API 유형. */
+export enum AuthProvider {
+    self = "self",
+    naver = "naver",
+    kakao = "kakao",
+    apple = "apple"
+}
 
 export class Auth {
     static LENGTH = 6;
@@ -52,6 +60,16 @@ export class Auth {
     /** 주어진 엑세스 토큰에 해당하는 사용자 아이디를 반환합니다. */
     static async userIdOf(accessToken: string) {
         return await REDIS_CLIENT.hGet("AccessToken", accessToken);
+    }
+
+    /** 주어진 사용자 아이디를 기반으로 인증 유형을 반환합니다. */
+    static async providerOf(userId: string): Promise<AuthProvider> {
+        const [row] = await DB_CLIENT.query(
+            "SELECT provider FROM UserOAuth WHERE userId = ? LIMIT 1",
+            [userId]
+        );
+
+        return row ? row.provider : AuthProvider.self;
     }
 
     static delegate(listener: HTTPAuthHandlerListener): HTTPHandlerListener {

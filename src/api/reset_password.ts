@@ -2,7 +2,7 @@ import { z } from "zod";
 import { HTTPHandler } from "../core/http_handler";
 import { APILength } from "./components/api_length";
 import { API } from "./components/api";
-import { Auth } from "./components/auth";
+import { Auth, AuthProvider } from "./components/auth";
 import { Mail } from "./components/mail";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { APIError } from "./components/api_error";
@@ -31,6 +31,12 @@ export const RESET_PASSWORD_HANDLER = new HTTPHandler({
         const userId = row.id;
         const authUUID = API.createUUID();
         const authNums = Auth.createNumbers();
+        const provider = await Auth.providerOf(userId);
+
+        // OAuth 방식으로 로그인된 사용자의 경우, 비밀번호를 설정할 수 없습니다.
+        if (provider != AuthProvider.self) {
+            throw APIError.CANNOT_OAUTH;
+        }
 
         await Mail.sendAuthNumbers("이사고 비밀번호 변경을 위한 인증 번호", given.email, authNums);
 
