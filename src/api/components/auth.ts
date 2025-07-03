@@ -100,7 +100,7 @@ export class Auth {
                 return;
             }
 
-            listener(request, response, body, userId);
+            await listener(request, response, body, userId);
         }
     }
 }
