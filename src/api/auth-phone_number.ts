@@ -1,16 +1,15 @@
 import { z } from "zod";
 import { HTTPHandler } from "../core/http_handler";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { API } from "./components/api";
 import { SMS } from "./components/sms";
 import { Test } from "./components/test";
 import { APIError } from "./components/api_error";
 import { Auth } from "./components/auth";
 import { REDIS_CLIENT } from "..";
-import { parsePhoneNumberFromString, PhoneNumber } from 'libphonenumber-js';
 
 export const AuthPhoneNumberRequest = z.object({
-    phoneNumber: z.string().max(APILength.phoneNumber)
+    phoneNumber: APISchema.phoneNumber
 });
 
 // auth/phone-number

@@ -1,14 +1,12 @@
 import { HTTPHandler } from "../core/http_handler";
 import { API } from "./components/api";
 import { z } from "zod";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { DB_CLIENT } from "..";
 import { APIError } from "./components/api_error";
 
 const ProfileRequest = z.object({
-    uuid: z.string()
-        .min(APILength.uuid)
-        .max(APILength.uuid)
+    uuid: APISchema.uuid
 });
 
 // profile

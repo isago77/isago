@@ -4,12 +4,10 @@ import { API } from "./components/api";
 import { REDIS_CLIENT } from "..";
 import { APIError } from "./components/api_error";
 import { Auth } from "./components/auth";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 
 const SignInReissueRequest = z.object({
-    refreshToken: z.string()
-        .min(APILength.token)
-        .max(APILength.token)
+    refreshToken: APISchema.token
 });
 
 class SignInReissueError {

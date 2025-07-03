@@ -1,6 +1,6 @@
 import { HTTPHandler } from "../core/http_handler";
 import { z } from "zod";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { API } from "./components/api";
 import { Test } from "./components/test";
 import { APIError } from "./components/api_error";
@@ -9,14 +9,12 @@ import { Mail } from "./components/mail";
 import { Auth } from "./components/auth";
 
 export const SignUpRequest = z.object({
-    email: z.string().max(APILength.email),
-    displayName: z.string().min(2).max(15),
-    phoneNumberToken: z.string()
-        .min(APILength.token)
-        .max(APILength.token),
+    email: APISchema.email,
+    displayName: APISchema.Profile.displayName,
+    phoneNumberToken: APISchema.token,
     password: z.string(),
     marketingAccepted: z.boolean(),
-    profileUrl: z.string().max(APILength.url).optional()
+    profileUrl: APISchema.url.optional()
 });
 
 class SignUpError {

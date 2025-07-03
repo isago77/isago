@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { HTTPHandler } from "../core/http_handler";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { API } from "./components/api";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { APIError } from "./components/api_error";
@@ -15,16 +15,9 @@ const SignUpOAuth = z.object({
 });
 
 const SignUpOAuthRequest = z.object({
-    uuid: z.string()
-        .min(APILength.uuid)
-        .max(APILength.uuid),
-
-    phoneNumberToken: z.string()
-        .min(APILength.token)
-        .max(APILength.token)
-        .optional(),
-
-    displayName: z.string().max(15).optional(),
+    uuid: APISchema.uuid,
+    phoneNumberToken: APISchema.token.optional(),
+    displayName: APISchema.Profile.displayName.optional(),
     marketingAccepted: z.boolean()
 });
 

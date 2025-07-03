@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { HTTPHandler } from "../core/http_handler";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { Auth } from "./components/auth";
 import { API } from "./components/api";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
@@ -10,12 +10,12 @@ import { randomBytes } from "crypto";
 
 /** 서버 측에서 정의한 회원가입 요청 정보에 대한 데이터 형태. */
 const SignUpAuth = SignUpRequest.extend({
-    numbers: z.string()
+    numbers: APISchema.authNumbers
 });
 
 export const SignUpVerifyRequest = z.object({
-    uuid: z.string().min(APILength.uuid).max(APILength.uuid),
-    numbers: z.string().min(Auth.LENGTH).max(Auth.LENGTH)
+    uuid: APISchema.uuid,
+    numbers: APISchema.authNumbers
 });
 
 // sign-up/auth

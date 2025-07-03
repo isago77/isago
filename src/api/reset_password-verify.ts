@@ -3,25 +3,19 @@ import { HTTPHandler } from "../core/http_handler";
 import { Auth } from "./components/auth";
 import { API } from "./components/api";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { APIError } from "./components/api_error";
 import { randomBytes } from "crypto";
 
 /** 서버 측에서 정의한 비밀번호 변경 요청 정보에 대한 데이터 형태. */
 const ResetPasswordAuth = z.object({
-    userId: z.string(),
-    numbers: z.string()
+    userId: APISchema.uuid,
+    numbers: APISchema.authNumbers
 });
 
 const ResetPasswordVerifyRequest = z.object({
-    uuid: z.string()
-        .min(APILength.uuid)
-        .max(APILength.uuid),
-
-    numbers: z.string()
-        .min(Auth.LENGTH)
-        .max(Auth.LENGTH),
-
+    uuid: APISchema.uuid,
+    numbers: APISchema.authNumbers,
     password: z.string()
 });
 

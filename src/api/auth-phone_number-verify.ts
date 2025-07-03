@@ -1,26 +1,19 @@
 import { z } from "zod";
 import { HTTPHandler } from "../core/http_handler";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { API } from "./components/api";
 import { Auth } from "./components/auth";
 import { REDIS_CLIENT } from "..";
-import { AuthPhoneNumberRequest } from "./auth-phone_number";
 import { APIError } from "./components/api_error";
 
-const PhoneNumberAuth = AuthPhoneNumberRequest.extend({
-    numbers: z.string()
-        .min(Auth.LENGTH)
-        .max(Auth.LENGTH)
+const PhoneNumberAuth = z.object({
+    phoneNumber: APISchema.phoneNumberAsE164,
+    numbers: APISchema.authNumbers
 });
 
 const AuthPhoneNumberVerifiyRequest = z.object({
-    uuid: z.string()
-        .min(APILength.uuid)
-        .max(APILength.uuid),
-
-    numbers: z.string()
-        .min(Auth.LENGTH)
-        .max(Auth.LENGTH)
+    uuid: APISchema.uuid,
+    numbers: APISchema.authNumbers
 });
 
 // auth/phone-number/verify

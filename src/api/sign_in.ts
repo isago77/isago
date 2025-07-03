@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { HTTPHandler } from "../core/http_handler";
 import { API } from "./components/api";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { DB_CLIENT } from "..";
 import { APIError } from "./components/api_error";
 import { Auth } from "./components/auth";
 
 const SignInRequest = z.object({
-    email: z.string().max(APILength.email),
+    email: APISchema.email,
     password: z.string()
 });
 

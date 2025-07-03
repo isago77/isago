@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { HTTPHandler } from "../core/http_handler";
-import { APILength } from "./components/api_length";
+import { APISchema } from "./components/api_schema";
 import { API } from "./components/api";
 import { Auth, AuthProvider } from "./components/auth";
 import { Mail } from "./components/mail";
@@ -8,7 +8,7 @@ import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { APIError } from "./components/api_error";
 
 const ResetPasswordRequest = z.object({
-    email: z.string().max(APILength.email)
+    email: APISchema.email
 });
 
 class ResetPasswordError {

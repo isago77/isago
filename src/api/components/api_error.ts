@@ -9,8 +9,13 @@ export class APIError {
         this.code = code;
     }
 
+    /** 유효하지 않은 요청 포맷일 때. */
     static INVALID_REQUEST_FORMAT = new APIError("INVALID_REQUEST_FORMAT", 400);
+
+    /** 유효하지 않은 UUID일 때. */
     static INVALID_UUID = new APIError("INVALID_UUID", 400);
+
+    /** OAuth 사용자는 지원되지 않는 기능일 때. */
     static CANNOT_OAUTH = new APIError("CANNOT_OAUTH", 400);
 
     /** 유효하지 않은 인증 번호를 요청했을 때. */

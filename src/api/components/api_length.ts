@@ -8,7 +8,6 @@
 export enum APILength {
     url = 512,
     email = 320,
-    phoneNumber = 15, // E.164
     uuid = 36,
     token = 64,
 }
