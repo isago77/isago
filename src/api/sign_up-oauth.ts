@@ -9,7 +9,9 @@ import { Auth } from "./components/auth";
 /** 서버 측에서 정의한 OAuth 회원가입 요청 정보에 대한 데이터 형태. */
 const SignUpOAuth = z.object({
     provider: z.string(),
-    providerUserId: z.union([z.string(), z.number()])
+    providerUserId: z.union([z.string(), z.number()]),
+    displayName: z.string().optional(),
+    phoneNumber: z.string().optional(),
 });
 
 const SignUpOAuthRequest = z.object({
@@ -17,8 +19,8 @@ const SignUpOAuthRequest = z.object({
         .min(APILength.uuid)
         .max(APILength.uuid),
 
-    displayName: z.string().max(15),
-    phoneNumber: z.string().max(APILength.phoneNumber),
+    displayName: z.string().max(15).optional(),
+    phoneNumber: z.string().max(APILength.phoneNumber).optional(),
     marketingAccepted: z.boolean()
 });
 
@@ -33,6 +35,14 @@ export const SIGN_UP_OAUTH_HANDLER = new HTTPHandler({
         if (!rawInfo) throw APIError.INVALID_UUID;
 
         const info = API.tryParseJSON(SignUpOAuth, rawInfo);
+        const displayName = info.displayName ?? given.displayName;
+        const phoneNumber = info.phoneNumber ?? given.phoneNumber;
+
+        // OAuth 측에서 사용자의 개인 정보가 제공되지 않았으나 추가 회원가입 절차에서도 제공되지 않았을 경우.
+        if (!displayName || !phoneNumber) {
+            throw APIError.INVALID_REQUEST_FORMAT;
+        }
+
         const userId = API.createUUID();
         const fields = [
             "id",
@@ -45,7 +55,7 @@ export const SIGN_UP_OAUTH_HANDLER = new HTTPHandler({
         await db.query("START TRANSACTION")
         await db.query(
             `INSERT INTO User(${fields.join(", ")}) VALUES(${fields.map(_ => "?").join(", ")})`,
-            [userId, given.displayName, given.phoneNumber, given.marketingAccepted]
+            [userId, displayName, phoneNumber, given.marketingAccepted]
         );
         await db.query(
             `INSERT INTO UserOAuth(userId, provider, providerUserId) VALUES(?, ?, ?)`,

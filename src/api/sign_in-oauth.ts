@@ -6,39 +6,60 @@ import axios, { AxiosError } from "axios";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { Auth } from "./components/auth";
 
+/** OAuth 로그인 시에 제공될 수 있는 사용자의 개인 정보. */
+interface OAuthUser {
+    userId: string;
+    displayName: string;
+    phoneNumber: string;
+}
+
 /**
  * 카카오 액세스 토큰으로 사용자 정보를 조회하고 아이디를 반환합니다.
  * 요청에 실패하거나 상태 코드가 200이 아닌 경우 예외를 발생시킵니다.
  */
-async function userIdByKakao(token: string) {
+async function userIdByKakao(token: string): Promise<OAuthUser> {
     const result = await axios.get(
         "https://kapi.kakao.com/v2/user/me", {
         headers: {Authorization: `Bearer ${token}`},
         validateStatus: (status) => status == 200
     });
 
-    return result.data.id as string;
+    // 사용자 개인 정보.
+    const profile = result.data.kakao_account.profile;
+
+    return {
+        userId: result.data.id as string,
+        displayName: profile.nickname as string,
+        phoneNumber: profile.phone_number as string
+    };
 }
 
 /**
  * 네이버 액세스 토큰으로 사용자 정보를 조회하고 아이디를 반환합니다.
  * 요청에 실패하거나 상태 코드가 200이 아닌 경우 예외를 발생시킵니다.
  */
-async function userIdByNaver(token: string) {
+async function userIdByNaver(token: string): Promise<OAuthUser> {
     const result = await axios.get(
         "https://openapi.naver.com/v1/nid/me", {
         headers: {Authorization: `Bearer ${token}`},
         validateStatus: (status) => status == 200
     });
 
-    return result.data.response.id as string;
+    // 사용자 개인 정보.
+    const profile = result.data.response;
+
+    return {
+        userId: profile.id as string,
+        displayName: profile.name,
+        phoneNumber: profile.mobile_e164
+    }
 }
 
 /**
  * Apple 인증 코드로 사용자 정보를 조회하고 아이디를 반환합니다.
  * 요청에 실패하거나 상태 코드가 200이 아닌 경우 예외를 발생시킵니다.
  */
-async function userIdByApple(token: string) {
+async function userIdByApple(token: string): Promise<OAuthUser> {
     throw SignInOauthError.INVALID_PROVIDER;
 }
 
@@ -78,7 +99,8 @@ export const SIGN_IN_OAUTH_HANDLER = new HTTPHandler({
         const given = API.tryParseJSON(SignInOauthRequest, body);
 
         // OAuth에 대한 사용자 아이디를 정의합니다.
-        const providerUserId = await oauth(given.token, given.provider);
+        const oauthUser = await oauth(given.token, given.provider);
+        const providerUserId = oauthUser.userId;
 
         const [row] = await DB_CLIENT.query(
             "SELECT userId FROM UserOAuth WHERE providerUserId = ? LIMIT 1",
@@ -94,15 +116,26 @@ export const SIGN_IN_OAUTH_HANDLER = new HTTPHandler({
         } else {
             const authUUID = API.createUUID();
             const provider = given.provider;
+            const keepData = {
+                provider,
+                providerUserId,
+                displayName: oauthUser.displayName,
+                phoneNumber: oauthUser.phoneNumber
+            }
 
             REDIS_CLIENT.multi()
                 // OAuth 회원가입에 대한 추가적인 인증 작업을 위한 인증 번호를 설정합니다.
-                .hSet("SignUpOAuth", authUUID, JSON.stringify({provider, providerUserId}))
+                .hSet("SignUpOAuth", authUUID, JSON.stringify(keepData))
                 // 해당 인증 번호에 대한 만료 시간을 설정합니다. (예시: 10분)
                 .hExpire("SignUpOAuth", authUUID, Auth.DURATION)
                 .exec();
 
-            API.success(response, {signUpRequired: true, uuid: authUUID});
+            API.success(response, {
+                signUpRequired: true,
+                uuid: authUUID,
+                needsDisplayName: oauthUser.displayName == null,
+                needsPhoneNumber: oauthUser.phoneNumber == null,
+            });
         }
     }
 });

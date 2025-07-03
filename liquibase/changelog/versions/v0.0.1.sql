@@ -5,7 +5,7 @@ CREATE TABLE `User`(
     `id` CHAR(36) PRIMARY KEY,
     `email` VARCHAR(320) UNIQUE,
     `displayName` VARCHAR(15) NOT NULL,
-    `phoneNumber` VARCHAR(11) NOT NULL,
+    `phoneNumber` VARCHAR(15) NOT NULL, -- E.164
     `password` CHAR(128), -- SHA-512
     `passwordSalt` CHAR(64), -- SHA-256
     `marketingAccepted` BOOLEAN NOT NULL,
