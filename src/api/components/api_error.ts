@@ -12,4 +12,10 @@ export class APIError {
     static INVALID_REQUEST_FORMAT = new APIError("INVALID_REQUEST_FORMAT", 400);
     static INVALID_UUID = new APIError("INVALID_UUID", 400);
     static CANNOT_OAUTH = new APIError("CANNOT_OAUTH", 400);
+
+    /** 유효하지 않은 인증 번호를 요청했을 때. */
+    static INVALID_AUTH_NUMBERS = new APIError("INVALID_AUTH_NUMBERS", 400);
+
+    /** 유효하지 않은 전화번호 인증 토큰일 때. */
+    static INVALID_PHONE_NUMBER_TOKEN = new APIError("INVALID_PHONE_NUMBER_TOKEN", 400);
 }

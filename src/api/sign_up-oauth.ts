@@ -19,8 +19,12 @@ const SignUpOAuthRequest = z.object({
         .min(APILength.uuid)
         .max(APILength.uuid),
 
+    phoneNumberToken: z.string()
+        .min(APILength.token)
+        .max(APILength.token)
+        .optional(),
+
     displayName: z.string().max(15).optional(),
-    phoneNumber: z.string().max(APILength.phoneNumber).optional(),
     marketingAccepted: z.boolean()
 });
 
@@ -36,11 +40,21 @@ export const SIGN_UP_OAUTH_HANDLER = new HTTPHandler({
 
         const info = API.tryParseJSON(SignUpOAuth, rawInfo);
         const displayName = info.displayName ?? given.displayName;
-        const phoneNumber = info.phoneNumber ?? given.phoneNumber;
+        let phoneNumber = info.phoneNumber ?? given.phoneNumberToken;
 
         // OAuth 측에서 사용자의 개인 정보가 제공되지 않았으나 추가 회원가입 절차에서도 제공되지 않았을 경우.
         if (!displayName || !phoneNumber) {
             throw APIError.INVALID_REQUEST_FORMAT;
+        }
+
+        // 전화번호 토큰을 실제 값인 국제 전화번호 형태로 치환.
+        if (given.phoneNumberToken != null) {
+            phoneNumber = await Auth.phoneNumberOf(phoneNumber);
+        }
+
+        // 전화번호 토큰이 유효하지 않은 경우.
+        if (!phoneNumber) {
+            throw APIError.INVALID_PHONE_NUMBER_TOKEN;
         }
 
         const userId = API.createUUID();

@@ -11,7 +11,9 @@ import { Auth } from "./components/auth";
 export const SignUpRequest = z.object({
     email: z.string().max(APILength.email),
     displayName: z.string().min(2).max(15),
-    phoneNumber: z.string().max(APILength.phoneNumber),
+    phoneNumberToken: z.string()
+        .min(APILength.token)
+        .max(APILength.token),
     password: z.string(),
     marketingAccepted: z.boolean(),
     profileUrl: z.string().max(APILength.url).optional()

@@ -13,11 +13,6 @@ const SignUpAuth = SignUpRequest.extend({
     numbers: z.string()
 });
 
-class SignUpVerifyError {
-    /** 유효하지 않은 인증 번호를 요청했을 때. */
-    static INVALID_AUTH_NUMBERS = new APIError("INVALID_AUTH_NUMBERS", 400);
-}
-
 export const SignUpVerifyRequest = z.object({
     uuid: z.string().min(APILength.uuid).max(APILength.uuid),
     numbers: z.string().min(Auth.LENGTH).max(Auth.LENGTH)
@@ -36,7 +31,7 @@ export const SIGN_UP_AUTH_HANDLER = new HTTPHandler({
 
         // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.
         if (given.numbers != info.numbers) {
-            throw SignUpVerifyError.INVALID_AUTH_NUMBERS;
+            throw APIError.INVALID_AUTH_NUMBERS;
         }
 
         const userId = API.createUUID();
@@ -55,9 +50,16 @@ export const SIGN_UP_AUTH_HANDLER = new HTTPHandler({
             "marketingAccepted"
         ];
 
+        const phoneNumber = await Auth.phoneNumberOf(info.phoneNumberToken);
+
+        // 유효하지 않은 전화번호 토큰일 경우.
+        if (!phoneNumber) {
+            throw APIError.INVALID_PHONE_NUMBER_TOKEN;
+        }
+
         await DB_CLIENT.query(
             `INSERT INTO User(${fields.join(", ")}) VALUES(${fields.map(_ => "?").join(", ")})`,
-            [userId, email, displayName, info.phoneNumber, password, passSalt, info.marketingAccepted]
+            [userId, email, displayName, phoneNumber, password, passSalt, info.marketingAccepted]
         );
 
         // 회원가입 작업이 최종적으로 완료되었으므로 인증 번호에 대한 UUID이(가) 만료되어야 함.

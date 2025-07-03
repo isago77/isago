@@ -25,11 +25,6 @@ const ResetPasswordVerifyRequest = z.object({
     password: z.string()
 });
 
-class ResetPasswordVerifyError {
-    /** 유효하지 않은 인증 번호를 요청했을 때. */
-    static INVALID_AUTH_NUMBERS = new APIError("INVALID_AUTH_NUMBERS", 400);
-}
-
 // reset-password/auth
 export const RESET_PASSWORD_AUTH_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
@@ -42,7 +37,7 @@ export const RESET_PASSWORD_AUTH_HANDLER = new HTTPHandler({
 
         // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.
         if (info.numbers != given.numbers) {
-            throw ResetPasswordVerifyError.INVALID_AUTH_NUMBERS;
+            throw APIError.INVALID_AUTH_NUMBERS;
         }
 
         const passSalt = Auth.hashAsBase64("sha256", randomBytes(128));

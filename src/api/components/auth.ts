@@ -72,6 +72,18 @@ export class Auth {
         return row ? row.provider : AuthProvider.self;
     }
 
+    /** 주어진 전화번호 토큰에 해당하는 전화번호를 반환합니다. */
+    static async phoneNumberOf(token: string) {
+        const result = await REDIS_CLIENT.hGet("PhoneNumberToken", token);
+
+        // 전화번호 토큰은 일회성으로 사용되므로 한번 참조 가능하도록 하되 토큰을 만료시킵니다.
+        if (result) {
+            await REDIS_CLIENT.hDel("PhoneNumberToken", token);
+        }
+
+        return result;
+    }
+
     static delegate(listener: HTTPAuthHandlerListener): HTTPHandlerListener {
         return async (request, response, body) => {
             const accessToken = request.headers.authorization;
