@@ -54,7 +54,7 @@ export const SIGN_UP_HANDLER = new HTTPHandler({
             throw SignUpError.INVALID_EMAIL;
         }
 
-        REDIS_CLIENT.multi()
+        await REDIS_CLIENT.multi()
             // 회원가입에 대한 추가적인 인증 작업을 위한 인증 번호를 설정합니다.
             .hSet("SignUpAuth", authUUID, JSON.stringify({...given, ...{numbers: authNums}}))
             // 해당 인증 번호에 대한 만료 시간을 설정합니다. (예시: 10분)

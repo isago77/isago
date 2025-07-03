@@ -13,12 +13,12 @@ const SignUpAuth = SignUpRequest.extend({
     numbers: z.string()
 });
 
-class SignUpAuthError {
+class SignUpVerifyError {
     /** 유효하지 않은 인증 번호를 요청했을 때. */
     static INVALID_AUTH_NUMBERS = new APIError("INVALID_AUTH_NUMBERS", 400);
 }
 
-export const SignUpAuthRequest = z.object({
+export const SignUpVerifyRequest = z.object({
     uuid: z.string().min(APILength.uuid).max(APILength.uuid),
     numbers: z.string().min(Auth.LENGTH).max(Auth.LENGTH)
 });
@@ -26,7 +26,7 @@ export const SignUpAuthRequest = z.object({
 // sign-up/auth
 export const SIGN_UP_AUTH_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        const given = API.tryParseJSON(SignUpAuthRequest, body);
+        const given = API.tryParseJSON(SignUpVerifyRequest, body);
 
         const rawInfo = await REDIS_CLIENT.hGet("SignUpAuth", given.uuid);
         if (!rawInfo) throw APIError.INVALID_UUID;
@@ -36,7 +36,7 @@ export const SIGN_UP_AUTH_HANDLER = new HTTPHandler({
 
         // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.
         if (given.numbers != info.numbers) {
-            throw SignUpAuthError.INVALID_AUTH_NUMBERS;
+            throw SignUpVerifyError.INVALID_AUTH_NUMBERS;
         }
 
         const userId = API.createUUID();

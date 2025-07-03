@@ -4,6 +4,7 @@ import * as http from "http";
 import { OutgoingHttpHeaders } from "http2";
 import { ServerResponse } from "http";
 import { z } from "zod";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 export class API {
     // 서버가 직렬화된 데이터를 응답할 때, 사용되는 표준적인 헤더 값입니다.
@@ -53,6 +54,16 @@ export class API {
     ): z.infer<T> {
         const query = Object.fromEntries(given.searchParams.entries());
         return this.#validate(object, query);
+    }
+
+    /** 주어진 국내 전화번호 형식을 국제 표준 전화번호 형식인 E164 형식으로 변환합니다. */
+    static formatToE164(phoneNumber: string) {
+        const parsedNumber = parsePhoneNumberFromString(phoneNumber, "KR");
+        if (!(parsedNumber && parsedNumber.isValid())) {
+            throw Error("국내 전화번호 형식을 국제 표준 전화번호 형식(E164)으로 변환하는 과정에서 예외가 발생하였습니다.");
+        }
+
+        return parsedNumber.number;
     }
 
     /** 데이터베이스 또는 서버 측에서 사용되는 표준 UUID를 생성합니다. */

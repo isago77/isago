@@ -5,17 +5,19 @@ import { createClient } from "redis";
 import { HTTPRouter } from "./core/http_router";
 import { SIGN_UP_HANDLER } from "./api/sign_up";
 import { HTTPConnection } from "./core/http_connection";
-import { SIGN_UP_AUTH_HANDLER } from "./api/sign_up-auth";
+import { SIGN_UP_AUTH_HANDLER } from "./api/sign_up-verify";
 import { SIGN_IN_REISSUE_HANDLER } from "./api/sign_in-reissue";
 import { SIGN_IN_HANDLER } from "./api/sign_in";
 import { RESET_PASSWORD_HANDLER } from "./api/reset_password";
-import { RESET_PASSWORD_AUTH_HANDLER } from "./api/reset_password-auth";
+import { RESET_PASSWORD_AUTH_HANDLER } from "./api/reset_password-verify";
 import { SIGN_IN_OAUTH_HANDLER } from "./api/sign_in-oauth";
 import { SIGN_UP_OAUTH_HANDLER } from "./api/sign_up-oauth";
 import { PROFILE_HANDLER } from "./api/profile";
 import { API } from "./api/components/api";
 import { PROFILE_SELF_HANDLER } from "./api/profile-self";
 import { SIGN_OUT_HANDLER } from "./api/sign_out";
+import { AUTH_PHONE_NUMBER_HANDLER } from "./api/auth-phone_number";
+import { AUTH_PHONE_NUMBER_VERIFY_HANDLER } from "./api/auth-phone_number-verify";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -46,9 +48,11 @@ export const REDIS_CLIENT = createClient({
 // reset-password/auth
 // profile
 // profile/self
+// auth/phone-number
+// auth/phone-number/verify
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
-        new HTTPRouter("auth", SIGN_UP_AUTH_HANDLER),
+        new HTTPRouter("verify", SIGN_UP_AUTH_HANDLER),
         new HTTPRouter("oauth", SIGN_UP_OAUTH_HANDLER),
     ]),
     new HTTPRouter("sign-in", SIGN_IN_HANDLER, [
@@ -57,7 +61,12 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
     new HTTPRouter("sign-out", SIGN_OUT_HANDLER),
     new HTTPRouter("reset-password", RESET_PASSWORD_HANDLER, [
-        new HTTPRouter("auth", RESET_PASSWORD_AUTH_HANDLER)
+        new HTTPRouter("verify", RESET_PASSWORD_AUTH_HANDLER)
+    ]),
+    new HTTPRouter("auth", undefined, [
+        new HTTPRouter("phone-number", AUTH_PHONE_NUMBER_HANDLER, [
+            new HTTPRouter("verify", AUTH_PHONE_NUMBER_VERIFY_HANDLER)
+        ])
     ]),
     new HTTPRouter("profile", PROFILE_HANDLER, [
         new HTTPRouter("self", PROFILE_SELF_HANDLER)
