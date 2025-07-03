@@ -10,7 +10,7 @@ CREATE TABLE `User`(
     `passwordSalt` CHAR(64), -- SHA-256
     `marketingAccepted` BOOLEAN NOT NULL,
     `profileUrl` VARCHAR(512)
-);  
+);
 
 --changeset ttangkong:2
 CREATE TABLE `UserOAuth`(

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { HTTPHandler } from "../core/http_handler";
+import { HTTPHandler } from "core";
 import { API } from "./components/api";
 import { REDIS_CLIENT } from "..";
 import { APIError } from "./components/api_error";

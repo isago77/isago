@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { DB_CLIENT } from "..";
-import { HTTPHandler } from "../core/http_handler";
+import { HTTPHandler } from "core";
 import { API } from "./components/api";
 import { Auth, AuthProvider } from "./components/auth";
 import { APISchema } from "./components/api_schema";

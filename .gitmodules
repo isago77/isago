@@ -1,0 +1,3 @@
+[submodule "src/submodules/core"]
+	path = src/submodules/core
+	url = https://github.com/isago77/isago-core

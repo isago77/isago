@@ -2,9 +2,7 @@ import http from "http";
 import { config } from "dotenv";
 import { createPool } from "mariadb";
 import { createClient } from "redis";
-import { HTTPRouter } from "./core/http_router";
 import { SIGN_UP_HANDLER } from "./api/sign_up";
-import { HTTPConnection } from "./core/http_connection";
 import { SIGN_UP_AUTH_HANDLER } from "./api/sign_up-verify";
 import { SIGN_IN_REISSUE_HANDLER } from "./api/sign_in-reissue";
 import { SIGN_IN_HANDLER } from "./api/sign_in";
@@ -18,6 +16,7 @@ import { PROFILE_SELF_HANDLER } from "./api/profile-self";
 import { SIGN_OUT_HANDLER } from "./api/sign_out";
 import { AUTH_PHONE_NUMBER_HANDLER } from "./api/auth-phone_number";
 import { AUTH_PHONE_NUMBER_VERIFY_HANDLER } from "./api/auth-phone_number-verify";
+import { HTTPConnection, HTTPRouter } from "core";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -77,10 +76,9 @@ const server = http.createServer(async (request, response) => {
     if (request.url === undefined) return;
 
     try {
-        HTTP_ROUTER.perform(new HTTPConnection(
-            API.urlOf(request).pathname.split("/"),
+        HTTP_ROUTER.perform(HTTPConnection.fromServer(
             request,
-            response
+            response,
         ));
     } catch (error) {
         response.writeHead(500);

@@ -1,4 +1,4 @@
-import { HTTPHandler } from "../core/http_handler";
+import { HTTPHandler } from "core";
 import { API } from "./components/api";
 import { z } from "zod";
 import { APISchema } from "./components/api_schema";

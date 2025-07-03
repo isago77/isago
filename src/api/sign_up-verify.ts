@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { HTTPHandler } from "../core/http_handler";
+import { HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
 import { Auth } from "./components/auth";
 import { API } from "./components/api";

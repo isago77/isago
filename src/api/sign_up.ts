@@ -1,8 +1,7 @@
-import { HTTPHandler } from "../core/http_handler";
+import { HTTPHandler } from "core";
 import { z } from "zod";
 import { APISchema } from "./components/api_schema";
 import { API } from "./components/api";
-import { Test } from "./components/test";
 import { APIError } from "./components/api_error";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { Mail } from "./components/mail";
@@ -24,10 +23,6 @@ class SignUpError {
 }
 
 export async function validSignUpRequest(given: z.infer<typeof SignUpRequest>) {
-    if (!Test.isEmail(given.email)) {
-        throw SignUpError.INVALID_EMAIL_FORMAT;
-    }
-
     // 사용자가 요청한 이메일이 이미 존재하는지 확인.
     const result = await DB_CLIENT.query(
         "SELECT 1 FROM `User` WHERE email = ? LIMIT 1",

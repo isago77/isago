@@ -1,7 +1,7 @@
 import { BinaryLike, createHash, randomBytes } from "crypto";
 import { DB_CLIENT, REDIS_CLIENT } from "../..";
 import * as http from "http";
-import { HTTPHandlerListener } from "../../core/http_handler";
+import { HTTPHandlerListener } from "core";
 
 export type HTTPAuthHandlerListener = (
     request: http.IncomingMessage,

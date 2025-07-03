@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "serve": "npm-run-all --parallel start setup",
+    "build": "git submodule update --init --remote --recursive",
+    "serve": "npm run build && npm-run-all --parallel start setup",
     "start": "ts-node src/index.ts",
     "watch": "nodemon --watch src/**/* --ext ts",
     "setup": "docker compose up"
@@ -13,6 +14,7 @@
     "@types/uuid": "^10.0.0",
     "axios": "^1.10.0",
     "cookie": "^1.0.1",
+    "core": "file:src/submodules/core",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "libphonenumber-js": "^1.12.9",
