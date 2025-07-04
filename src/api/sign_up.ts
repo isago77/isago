@@ -1,8 +1,6 @@
-import { HTTPHandler } from "core";
+import { API, APIError, HTTPHandler } from "core";
 import { z } from "zod";
 import { APISchema } from "./components/api_schema";
-import { API } from "./components/api";
-import { APIError } from "./components/api_error";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { Mail } from "./components/mail";
 import { Auth } from "./components/auth";

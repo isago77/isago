@@ -1,10 +1,8 @@
 import { z } from "zod";
-import { HTTPHandler } from "core";
+import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
-import { API } from "./components/api";
 import { SMS } from "./components/sms";
 import { Test } from "./components/test";
-import { APIError } from "./components/api_error";
 import { Auth } from "./components/auth";
 import { REDIS_CLIENT } from "..";
 

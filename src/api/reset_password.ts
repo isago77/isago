@@ -1,11 +1,9 @@
 import { z } from "zod";
-import { HTTPHandler } from "core";
+import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
-import { API } from "./components/api";
 import { Auth, AuthProvider } from "./components/auth";
 import { Mail } from "./components/mail";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
-import { APIError } from "./components/api_error";
 
 const ResetPasswordRequest = z.object({
     email: APISchema.email

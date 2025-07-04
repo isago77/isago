@@ -1,9 +1,7 @@
 import { z } from "zod";
-import { HTTPHandler } from "core";
+import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
-import { API } from "./components/api";
 import { REDIS_CLIENT } from "..";
-import { APIError } from "./components/api_error";
 
 const SignOutRequest = z.object({
     accessToken: APISchema.token.optional(),

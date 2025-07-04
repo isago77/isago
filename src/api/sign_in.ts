@@ -1,9 +1,7 @@
 import { z } from "zod";
-import { HTTPHandler } from "core";
-import { API } from "./components/api";
+import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
 import { DB_CLIENT } from "..";
-import { APIError } from "./components/api_error";
 import { Auth } from "./components/auth";
 
 const SignInRequest = z.object({

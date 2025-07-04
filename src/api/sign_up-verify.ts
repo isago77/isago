@@ -1,10 +1,8 @@
 import { z } from "zod";
-import { HTTPHandler } from "core";
+import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
 import { Auth } from "./components/auth";
-import { API } from "./components/api";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
-import { APIError } from "./components/api_error";
 import { SignUpRequest, validSignUpRequest } from "./sign_up";
 import { randomBytes } from "crypto";
 

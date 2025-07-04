@@ -1,11 +1,9 @@
 import { z } from "zod";
 import { DB_CLIENT } from "..";
-import { HTTPHandler } from "core";
-import { API } from "./components/api";
+import { API, APIError, HTTPHandler } from "core";
 import { Auth, AuthProvider } from "./components/auth";
 import { APISchema } from "./components/api_schema";
 import { SQLModifier } from "../sql/sql_modifer";
-import { APIError } from "./components/api_error";
 
 const ProfileSelfPatchRequest = z.object({
     displayName: APISchema.Profile.displayName.optional(),

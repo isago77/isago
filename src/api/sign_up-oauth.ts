@@ -1,9 +1,7 @@
 import { z } from "zod";
-import { HTTPHandler } from "core";
+import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
-import { API } from "./components/api";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
-import { APIError } from "./components/api_error";
 import { Auth } from "./components/auth";
 
 /** 서버 측에서 정의한 OAuth 회원가입 요청 정보에 대한 데이터 형태. */

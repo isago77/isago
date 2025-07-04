@@ -11,7 +11,6 @@ import { RESET_PASSWORD_AUTH_HANDLER } from "./api/reset_password-verify";
 import { SIGN_IN_OAUTH_HANDLER } from "./api/sign_in-oauth";
 import { SIGN_UP_OAUTH_HANDLER } from "./api/sign_up-oauth";
 import { PROFILE_HANDLER } from "./api/profile";
-import { API } from "./api/components/api";
 import { PROFILE_SELF_HANDLER } from "./api/profile-self";
 import { SIGN_OUT_HANDLER } from "./api/sign_out";
 import { AUTH_PHONE_NUMBER_HANDLER } from "./api/auth-phone_number";
@@ -24,6 +23,7 @@ config();
 export const DB_CLIENT = createPool({
     host: process.env.MARIADB_HOST,
     user: process.env.MARIADB_USER,
+    port: parseInt(process.env.MARIADB_PORT!),
     password: process.env.MARIADB_PASSWORD,
     database: process.env.MARIADB_DATABASE,
     connectionLimit: parseInt(process.env.MARIADB_POOL_LIMIT!),

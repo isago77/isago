@@ -1,10 +1,8 @@
 import { z } from "zod";
-import { HTTPHandler } from "core";
+import { API, APIError, HTTPHandler } from "core";
 import { Auth } from "./components/auth";
-import { API } from "./components/api";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { APISchema } from "./components/api_schema";
-import { APIError } from "./components/api_error";
 import { randomBytes } from "crypto";
 
 /** 서버 측에서 정의한 비밀번호 변경 요청 정보에 대한 데이터 형태. */
