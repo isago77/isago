@@ -16,6 +16,7 @@ import { SIGN_OUT_HANDLER } from "./api/sign_out";
 import { AUTH_PHONE_NUMBER_HANDLER } from "./api/auth-phone_number";
 import { AUTH_PHONE_NUMBER_VERIFY_HANDLER } from "./api/auth-phone_number-verify";
 import { HTTPConnection, HTTPRouter } from "core";
+import { IMAGE_PROFILE_HANDLER } from "./api/image-profile";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -69,6 +70,9 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
     new HTTPRouter("profile", PROFILE_HANDLER, [
         new HTTPRouter("self", PROFILE_SELF_HANDLER)
+    ]),
+    new HTTPRouter("image", PROFILE_HANDLER, [
+        new HTTPRouter("profile", IMAGE_PROFILE_HANDLER)
     ])
 ]);
 
