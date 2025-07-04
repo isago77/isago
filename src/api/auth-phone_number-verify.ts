@@ -6,7 +6,8 @@ import { REDIS_CLIENT } from "..";
 
 const PhoneNumberAuth = z.object({
     phoneNumber: APISchema.phoneNumberAsE164,
-    numbers: APISchema.authNumbers
+    numbers: APISchema.authNumbers,
+    failCount: z.number(),
 });
 
 const AuthPhoneNumberVerifiyRequest = z.object({
@@ -23,9 +24,14 @@ export const AUTH_PHONE_NUMBER_VERIFY_HANDLER = new HTTPHandler({
         if (!rawInfo) throw APIError.INVALID_UUID;
 
         const info = API.tryParseJSON(PhoneNumberAuth, rawInfo);
+        const uuid = given.uuid;
 
         // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.
         if (info.numbers != given.numbers) {
+            (info.failCount += 1) >= Auth.MAX_FAIL_COUNT
+                ? await REDIS_CLIENT.hDel("PhoneNumberAuth", uuid)
+                : await REDIS_CLIENT.hSet("PhoneNumberAuth", uuid, JSON.stringify(info));
+
             throw APIError.INVALID_AUTH_NUMBERS;
         }
 

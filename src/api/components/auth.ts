@@ -24,6 +24,9 @@ export class Auth {
     static ACCESS_TOKEN_EXPIER_DURATION = 604800; // 1 weak
     static REFRESH_TOKEN_EXPIER_DURATION = 15552000; // 6 month
 
+    /** 이메일, 전화번호 인증과 같은 보안과 관련된 인증 시도를 최대한 할 수 있는 횟수. */
+    static MAX_FAIL_COUNT = 5;
+
     static createNumbers(length: number = this.LENGTH) {
         return Array.from({length}).map(_ => Math.floor(Math.random() * 10)).join("");
     }

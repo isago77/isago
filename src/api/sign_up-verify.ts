@@ -8,7 +8,8 @@ import { randomBytes } from "crypto";
 
 /** 서버 측에서 정의한 회원가입 요청 정보에 대한 데이터 형태. */
 const SignUpAuth = SignUpRequest.extend({
-    numbers: APISchema.authNumbers
+    numbers: APISchema.authNumbers,
+    failCount: z.number()
 });
 
 export const SignUpVerifyRequest = z.object({
@@ -16,19 +17,25 @@ export const SignUpVerifyRequest = z.object({
     numbers: APISchema.authNumbers
 });
 
-// sign-up/auth
-export const SIGN_UP_AUTH_HANDLER = new HTTPHandler({
+// sign-up/verify
+export const SIGN_UP_VERIFY_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
+        console.log("sdfsdfdsfs");
         const given = API.tryParseJSON(SignUpVerifyRequest, body);
 
         const rawInfo = await REDIS_CLIENT.hGet("SignUpAuth", given.uuid);
         if (!rawInfo) throw APIError.INVALID_UUID;
 
         const info = API.tryParseJSON(SignUpAuth, rawInfo);
+        const uuid = given.uuid;
         await validSignUpRequest(info);
 
         // 주어진 인증 번호가 기존 할당된 인증 번호와 일치하는지 확인.
         if (given.numbers != info.numbers) {
+            (info.failCount += 1) >= Auth.MAX_FAIL_COUNT
+                ? await REDIS_CLIENT.hDel("SignUpAuth", uuid)
+                : await REDIS_CLIENT.hSet("SignUpAuth", uuid, JSON.stringify(info));
+
             throw APIError.INVALID_AUTH_NUMBERS;
         }
 

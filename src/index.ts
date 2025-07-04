@@ -3,7 +3,6 @@ import { config } from "dotenv";
 import { createPool } from "mariadb";
 import { createClient } from "redis";
 import { SIGN_UP_HANDLER } from "./api/sign_up";
-import { SIGN_UP_AUTH_HANDLER } from "./api/sign_up-verify";
 import { SIGN_IN_REISSUE_HANDLER } from "./api/sign_in-reissue";
 import { SIGN_IN_HANDLER } from "./api/sign_in";
 import { RESET_PASSWORD_HANDLER } from "./api/reset_password";
@@ -17,6 +16,7 @@ import { AUTH_PHONE_NUMBER_HANDLER } from "./api/auth-phone_number";
 import { AUTH_PHONE_NUMBER_VERIFY_HANDLER } from "./api/auth-phone_number-verify";
 import { HTTPConnection, HTTPRouter } from "core";
 import { IMAGE_PROFILE_HANDLER } from "./api/image-profile";
+import { SIGN_UP_VERIFY_HANDLER } from "./api/sign_up-verify";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -52,7 +52,7 @@ export const REDIS_CLIENT = createClient({
 // auth/phone-number/verify
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
-        new HTTPRouter("verify", SIGN_UP_AUTH_HANDLER),
+        new HTTPRouter("verify", SIGN_UP_VERIFY_HANDLER),
         new HTTPRouter("oauth", SIGN_UP_OAUTH_HANDLER),
     ]),
     new HTTPRouter("sign-in", SIGN_IN_HANDLER, [
