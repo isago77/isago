@@ -17,7 +17,8 @@ export const PROFILE_HANDLER = new HTTPHandler({
             "id",
             "email",
             "displayName",
-            "profileUrl"
+            "profileUrl",
+            "role"
         ];
 
         const [row] = await DB_CLIENT.query(

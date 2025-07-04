@@ -9,7 +9,8 @@ CREATE TABLE `User`(
     `password` CHAR(128), -- SHA-512
     `passwordSalt` CHAR(64), -- SHA-256
     `marketingAccepted` BOOLEAN NOT NULL,
-    `profileUrl` VARCHAR(512)
+    `profileUrl` VARCHAR(512),
+    `role` ENUM("estimator", "mover", "admin")
 );
 
 --changeset ttangkong:2

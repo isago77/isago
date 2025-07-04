@@ -23,6 +23,7 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
             "a.phoneNumber",
             "a.marketingAccepted",
             "a.profileUrl",
+            "a.role",
             `IFNULL(b.provider, '${AuthProvider.self}') AS provider`
         ];
 
