@@ -14,8 +14,11 @@ export class UserError {
     /** 사용자가 견적 방문자가 아닌 경우에도 견적 방문자 권한이 필요한 관련 API를 요청하였을 때. */
     static ONLY_ESTIMATOR = new APIError("ONLY_ESTIMATOR", 403);
 
-    /** 사용자가 이사 업체가 아닌 경우에도 이사 업체 권한이 필요한 관련 API를 요청하였을 때. */
+    /** 사용자가 이사업체가 아닌 경우에도 이사 업체 권한이 필요한 관련 API를 요청하였을 때. */
     static ONLY_MOVER = new APIError("ONLY_MOVER", 403);
+
+    /** 사용자가 관리자, 견적 방문자, 이사업체 등 관계자가 아닌 경우에도 관련 API를 호출하였을 때. */
+    static REQUIRES_ROLE = new APIError("REQUIRES_ROLE", 403);
 }
 
 export class User {

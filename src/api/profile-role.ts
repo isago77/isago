@@ -4,6 +4,7 @@ import z from "zod";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { API } from "core/src";
 import { IssueRoleSerialRequest } from "./issue-role_serial";
+import { UserError } from "./components/user";
 
 /** 서버 측에서 정의한 역할에 대한 시리얼 키 정보에 대한 데이터 형태. */
 const RoleSerial = IssueRoleSerialRequest;
@@ -35,5 +36,18 @@ export const PROFILE_ROLE_HANDLER = new HTTPHandler({
         await REDIS_CLIENT.hDel("RoleSerial", given.serialKey);
 
         API.success(response, {role: info.role});
+    }),
+    delete: Auth.delegate(async (_1, response, _2, userId) => {
+        const result = await DB_CLIENT.query(
+            "UPDATE User SET role = ? WHERE id = ? AND role IS NOT NULL",
+            [null, userId]
+        );
+
+        // 조회된 결과를 기반으로 이미 역할이 존재하지 않은 경우.
+        if (result.affectedRows == 0) {
+            throw UserError.REQUIRES_ROLE;
+        }
+
+        API.success(response, undefined);
     })
 });
