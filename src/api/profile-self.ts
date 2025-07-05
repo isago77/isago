@@ -4,6 +4,7 @@ import { API, APIError, HTTPHandler } from "core";
 import { Auth, AuthProvider } from "./components/auth";
 import { APISchema } from "./components/api_schema";
 import { SQLModifier } from "../sql/sql_modifer";
+import { SQLTransaction } from "../sql/sql_transaction";
 
 const Link = z.object({
     label: z.string(),
@@ -20,6 +21,7 @@ const ProfileSelfPatchRequest = z.object({
     introduction: z.string().max(1024).optional(),
     bannerUrl: APISchema.url.optional(),
     links: z.array(Link).optional(),
+    address: APISchema.address.optional(),
     contactAs: APISchema.phoneNumber.optional(),
     serviceAreas: z.array(z.string()).optional()
 });
@@ -53,6 +55,7 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
                 `introduction`,
                 `bannerUrl`,
                 `links`,
+                `address`,
                 `contactAs`,
                 `serviceAreas`,
             ];
@@ -70,57 +73,54 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
     }),
     patch: Auth.delegate(async (_, response, body, userId) => {
         const given = API.tryParseJSON(ProfileSelfPatchRequest, body);
-        const db = await DB_CLIENT.getConnection();
 
-        db.query("START TRANSACTION");
+        await SQLTransaction.perform(async (db) => {
+            { // 필수 사용자 정보
+                const modifier = new SQLModifier();
+                modifier.addIfDefined(given, "displayName");
+                modifier.addIfDefined(given, "profileUrl");
+                modifier.addIfDefined(given, "marketingAccepted");
 
-        { // 필수 사용자 정보
-            const modifier = new SQLModifier();
-            modifier.addIfDefined(given, "displayName");
-            modifier.addIfDefined(given, "profileUrl");
-            modifier.addIfDefined(given, "marketingAccepted");
+                if (given.phoneNumberToken != null) {
+                    const phoneNumber = await Auth.phoneNumberOf(given.phoneNumberToken);
 
-            if (given.phoneNumberToken != null) {
-                const phoneNumber = await Auth.phoneNumberOf(given.phoneNumberToken);
+                    // 유효하지 않은 전화번호 토큰일 경우.
+                    if (!phoneNumber) {
+                        throw APIError.INVALID_PHONE_NUMBER_TOKEN;
+                    }
 
-                // 유효하지 않은 전화번호 토큰일 경우.
-                if (!phoneNumber) {
-                    throw APIError.INVALID_PHONE_NUMBER_TOKEN;
+                    modifier.add("phoneNumber", phoneNumber);
                 }
 
-                modifier.add("phoneNumber", phoneNumber);
+                await modifier.safety(async () => {
+                    await db.query(
+                        `UPDATE User SET ${modifier.setter} WHERE id = ?`,
+                        [...modifier.values, userId]
+                    );
+                });
             }
 
-            await modifier.safety(async () => {
-                await db.query(
-                    `UPDATE User SET ${modifier.setter} WHERE id = ?`,
-                    [...modifier.values, userId]
-                );
-            });
-        }
+            { // 부가적인 사용자 정보
+                const modifier = new SQLModifier();
+                modifier.addIfDefined(given, "introduction");
+                modifier.addIfDefined(given, "bannerUrl");
+                modifier.addIfDefined(given, "links");
+                modifier.addIfDefined(given, "address")
+                modifier.addIfDefined(given, "serviceAreas");
 
-        { // 부가적인 사용자 정보
-            const modifier = new SQLModifier();
-            modifier.addIfDefined(given, "introduction");
-            modifier.addIfDefined(given, "bannerUrl");
-            modifier.addIfDefined(given, "links");
-            modifier.addIfDefined(given, "serviceAreas");
+                // 검증된 사용자(e.g. 업체, 견적 방문자, 관리자)이기 때문에 별도의 인증은 필요 없음.
+                if (given.contactAs) {
+                    modifier.add("contactAs", API.formatToE164(given.contactAs));
+                }
 
-            // 검증된 사용자(e.g. 업체, 견적 방문자, 관리자)이기 때문에 별도의 인증은 필요 없음.
-            if (given.contactAs) {
-                modifier.add("contactAs", API.formatToE164(given.contactAs));
+                await modifier.safety(async () => {
+                    await db.query(
+                        `UPDATE IGNORE UserDetails SET ${modifier.setter} WHERE userId = ?`,
+                        [...modifier.values, userId]
+                    )
+                });
             }
-
-            await modifier.safety(async () => {
-                await db.query(
-                    `UPDATE IGNORE UserDetails SET ${modifier.setter} WHERE userId = ?`,
-                    [...modifier.values, userId]
-                )
-            });
-        }
-
-        db.query("COMMIT");
-        db.end();
+        });
 
         API.success(response, undefined);
     })

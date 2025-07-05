@@ -37,6 +37,17 @@ export namespace APISchema {
     /** 정의될 수 있는 최소한의 URL 형식. */
     export const url = z.string().max(APILength.url);
 
+    /** API 서버에서 표준적으로 주소를 정의하는 형식. */
+    export const address = z.object({
+        zipCode: z.number(),
+        details: z.string().optional(),
+        street: z.string(),
+        note: z.string().optional()
+    });
+
+    /** API 서버에서 표준적으로 날짜와 시간을 정의하는 형식. (ISO 8601) */
+    export const dateTime = z.string().min(19).max(29);
+
     export namespace Profile {
         /** 사용자 표시 이름. */
         export const displayName = z.string()

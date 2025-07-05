@@ -38,6 +38,7 @@ export const PROFILE_HANDLER = new HTTPHandler({
                 `introduction`,
                 `bannerUrl`,
                 `links`,
+                `address`,
                 `contactAs`,
                 `serviceAreas`,
             ];

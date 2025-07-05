@@ -19,6 +19,10 @@ import { IMAGE_PROFILE_HANDLER } from "./api/image-profile";
 import { SIGN_UP_VERIFY_HANDLER } from "./api/sign_up-verify";
 import { PROFILE_ROLE_HANDLER } from "./api/profile-role";
 import { ISSUE_ROLE_SERIAL_HANDLER } from "./api/issue-role_serial";
+import { STAGE_HANDLER } from "./api/stage/stage";
+import { STAGE_SEARCH_HANDLER } from "./api/stage/stage-search";
+import { STAGE_ESTIMATOR_HANDLER } from "./api/stage/stage-estimator";
+import { STAGE_ESTIMATOR_DONE_HANDLER } from "./api/stage/stage-estimator-done";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -54,6 +58,10 @@ export const REDIS_CLIENT = createClient({
 // auth/phone-number
 // auth/phone-number/verify
 // image/profile
+// issue/role-serial
+// stage
+// stage/search
+// stage/estimator
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
         new HTTPRouter("verify", SIGN_UP_VERIFY_HANDLER),
@@ -81,6 +89,12 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
     new HTTPRouter("issue", undefined, [
         new HTTPRouter("role-serial", ISSUE_ROLE_SERIAL_HANDLER)
+    ]),
+    new HTTPRouter("stage", STAGE_HANDLER, [
+        new HTTPRouter("search", STAGE_SEARCH_HANDLER),
+        new HTTPRouter("estimator", STAGE_ESTIMATOR_HANDLER, [
+            new HTTPRouter("done", STAGE_ESTIMATOR_DONE_HANDLER)
+        ]),
     ])
 ]);
 
