@@ -27,7 +27,9 @@ export class SQLModifier {
      * 이후 setter와 values에서 이 정보가 사용됩니다.
      */
     add(key: string, value: any) {
-        this.#params[key] = value;
+        value instanceof Object
+            ? this.#params[key] = JSON.stringify(value)
+            : this.#params[key] = value;
     }
 
     /**
