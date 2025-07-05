@@ -1,7 +1,7 @@
 import { BinaryLike, createHash, randomBytes } from "crypto";
 import { DB_CLIENT, REDIS_CLIENT } from "../..";
 import * as http from "http";
-import { HTTPHandlerListener } from "core";
+import { APIError, HTTPHandlerListener } from "core";
 
 export type HTTPAuthHandlerListener = (
     request: http.IncomingMessage,
@@ -24,9 +24,16 @@ export class Auth {
     static ACCESS_TOKEN_EXPIER_DURATION = 604800; // 1 weak
     static REFRESH_TOKEN_EXPIER_DURATION = 15552000; // 6 month
 
+    /** 시리얼 키에 대한 만료 기간. */
+    static SERIAL_EXPIER_DURATION = 86400; // 1 day
+
     /** 이메일, 전화번호 인증과 같은 보안과 관련된 인증 시도를 최대한 할 수 있는 횟수. */
     static MAX_FAIL_COUNT = 5;
 
+    /** 시리얼 키에서 정의될 수 있는 문자들을 총 나열한 문자열입니다. */
+    static SERIAL_STRINGS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    /** 숫자로 이루어진 일회용 비밀번호를 생성합니다. */
     static createNumbers(length: number = this.LENGTH) {
         return Array.from({length}).map(_ => Math.floor(Math.random() * 10)).join("");
     }
@@ -37,6 +44,23 @@ export class Auth {
      */
     static createToken() {
         return randomBytes(32).toString("hex");
+    }
+
+    /** 문자, 숫자 그리고 -으로 이루어진 시리얼 키를 생성합니다. (e.g. ARC1-BT2S-A23F) */
+    static createSerial(
+        blockCount: number = 3,
+        blockLength: number = 4
+    ) {
+        const randomChar = () => {
+            const index = Math.floor(Math.random() * Auth.SERIAL_STRINGS.length);
+            return Auth.SERIAL_STRINGS[index];
+        };
+
+        const randomBlock = () => {
+            return Array.from({length: blockLength}, randomChar).join('');
+        }
+
+        return Array.from({length: blockCount}, randomBlock).join('-');
     }
 
     /** 주어진 해시 알고리즘으로 입력값을 해싱하고 이를 Base64 형태로 반환합니다. */

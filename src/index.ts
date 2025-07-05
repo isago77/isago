@@ -17,6 +17,8 @@ import { AUTH_PHONE_NUMBER_VERIFY_HANDLER } from "./api/auth-phone_number-verify
 import { HTTPConnection, HTTPRouter } from "core";
 import { IMAGE_PROFILE_HANDLER } from "./api/image-profile";
 import { SIGN_UP_VERIFY_HANDLER } from "./api/sign_up-verify";
+import { PROFILE_ROLE_HANDLER } from "./api/profile-role";
+import { ISSUE_ROLE_SERIAL_HANDLER } from "./api/issue-role_serial";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -48,8 +50,10 @@ export const REDIS_CLIENT = createClient({
 // reset-password/auth
 // profile
 // profile/self
+// profile/role
 // auth/phone-number
 // auth/phone-number/verify
+// image/profile
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
         new HTTPRouter("verify", SIGN_UP_VERIFY_HANDLER),
@@ -69,10 +73,14 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
         ])
     ]),
     new HTTPRouter("profile", PROFILE_HANDLER, [
-        new HTTPRouter("self", PROFILE_SELF_HANDLER)
+        new HTTPRouter("self", PROFILE_SELF_HANDLER),
+        new HTTPRouter("role", PROFILE_ROLE_HANDLER),
     ]),
     new HTTPRouter("image", PROFILE_HANDLER, [
         new HTTPRouter("profile", IMAGE_PROFILE_HANDLER)
+    ]),
+    new HTTPRouter("issue", undefined, [
+        new HTTPRouter("role-serial", ISSUE_ROLE_SERIAL_HANDLER)
     ])
 ]);
 

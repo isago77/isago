@@ -20,3 +20,14 @@ CREATE TABLE `UserOAuth`(
     `providerUserId` VARCHAR(128) NOT NULL UNIQUE,
     FOREIGN KEY(`userId`) REFERENCES `User`(`id`)
 );
+
+-- changeset ttangkong:3
+CREATE TABLE `UserDetails`(
+    `userId` CHAR(36) PRIMARY KEY,
+    `introduction` VARCHAR(1024),
+    `bannerUrl` VARCHAR(512),
+    `links` JSON NOT NULL DEFAULT '[]',
+    `contactAs` VARCHAR(15),
+    `serviceAreas` JSON,
+    FOREIGN KEY(`userId`) REFERENCES `User`(`id`)
+);
