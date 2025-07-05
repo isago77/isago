@@ -34,6 +34,6 @@ export const PROFILE_ROLE_HANDLER = new HTTPHandler({
         // 사용된 시리얼 키를 만료시킵니다.
         await REDIS_CLIENT.hDel("RoleSerial", given.serialKey);
 
-        API.success(response, undefined);
+        API.success(response, {role: info.role});
     })
 });

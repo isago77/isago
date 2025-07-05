@@ -26,6 +26,6 @@ export const ISSUE_ROLE_SERIAL_HANDLER = new HTTPHandler({
             .hExpire("RoleSerial", serialKey, Auth.SERIAL_EXPIER_DURATION)
             .exec();
 
-        API.success(response, {serialKey: serialKey});
+        API.success(response, {serialKey});
     })
 });
