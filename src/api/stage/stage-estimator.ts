@@ -27,7 +27,7 @@ const StageEstimatorPatchRequest = z.object({
 });
 
 export class StageEstimatorError {
-    /** 사용자가 견적 방문자가 아니라서 권한이 부족한 경우. */
+    /** 견적 방문자가 이미 할당되어 이사 절차가 진행 중인 경우. */
     static ONLY_WAITING_ESTIMATOR_STATUS = new APIError("ONLY_WAITING_ESTIMATOR_STATUS", 403);
 
     /** 사용자가 요청한 견적을 담당하고 있는 견적 방문자가 아닌 경우. */
@@ -46,10 +46,8 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
             throw UserError.ONLY_ESTIMATOR;
         }
 
-        const db = await DB_CLIENT.getConnection();
-
         { // 요청한 이사 절차에 대한 유효성 검사.
-            const [row] = await db.query(
+            const [row] = await DB_CLIENT.query(
                 "SELECT status FROM Stage WHERE id = ? LIMIT 1",
                 [given.uuid]
             );
