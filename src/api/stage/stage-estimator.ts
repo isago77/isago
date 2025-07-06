@@ -15,7 +15,7 @@ const StageEstimatorPostRequest = z.object({
 
 const StageEstimatorGetRequest = z.object({
     // 사용자의 이사 절차에 대한 UUID
-    uuid: APISchema.uuid
+    stageId: APISchema.uuid,
 })
 
 const StageEstimatorPatchRequest = z.object({
@@ -132,7 +132,7 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
 
         const [row] = await DB_CLIENT.query(
             `SELECT ${fields.join(", ")} FROM EstimatorStage a JOIN Stage b ON b.id = a.stageId WHERE a.stageId = ?`,
-            [given.uuid]
+            [given.stageId]
         );
 
         // 유효하지 않은 UUID인 경우.
