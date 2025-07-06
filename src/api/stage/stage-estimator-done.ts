@@ -24,6 +24,7 @@ class StageEstimatorDoneError {
     static INVALID_STAGE_STATUS = new APIError("INVALID_STAGE_STATUS", 400);
 }
 
+// stage/estimator/done
 export const STAGE_ESTIMATOR_DONE_HANDLER = new HTTPHandler({
     post: Auth.delegate(async (_, response, body, userId) => {
         const given = API.tryParseJSON(StageEstimatorDoneRequest, body);

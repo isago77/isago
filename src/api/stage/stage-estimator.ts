@@ -13,6 +13,11 @@ const StageEstimatorPostRequest = z.object({
     uuid: APISchema.uuid
 });
 
+const StageEstimatorGetRequest = z.object({
+    // 사용자의 이사 절차에 대한 UUID
+    uuid: APISchema.uuid
+})
+
 const StageEstimatorPatchRequest = z.object({
     uuid: APISchema.uuid,
     visitDate: APISchema.dateTime.optional(),
@@ -29,7 +34,7 @@ export class StageEstimatorError {
     static ESTIMATOR_NOT_ASSIGNED_TO_STAGE = new APIError("ESTIMATOR_NOT_ASSIGNED_TO_STAGE", 403);
 }
 
-// stage/estimate
+// stage/estimator
 export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
     post: Auth.delegate(async (_, response, body, userId) => {
         const given = API.tryParseJSON(StageEstimatorPostRequest, body);
@@ -112,5 +117,36 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
         });
 
         API.success(response, undefined);
+    }),
+    get: Auth.delegate(async (request, response, _, userId) => {
+        const given = API.tryParseURL(StageEstimatorGetRequest, API.urlOf(request));
+
+        const fields = [
+            "a.id",
+            "a.stageId",
+            "a.estimatorId",
+            "a.visitDate",
+            "a.location",
+            "a.details",
+            "a.status",
+            "b.userId"
+        ]
+
+        const [row] = await DB_CLIENT.query(
+            `SELECT ${fields.join(", ")} FROM EstimatorStage a JOIN Stage b ON b.id = a.stageId WHERE a.stageId = ?`,
+            [given.uuid]
+        );
+
+        // 유효하지 않은 UUID인 경우.
+        if (!row) throw APIError.INVALID_UUID;
+
+        // 해당 이사 절차의 사용자이거나 견적 방문자가 아닌 경우.
+        if (row.estimatorId != userId && row.userId != userId) {
+            response.writeHead(403);
+            response.end();
+            return;
+        }
+
+        API.success(response, row);
     })
 });

@@ -23,6 +23,7 @@ import { STAGE_HANDLER } from "./api/stage/stage";
 import { STAGE_SEARCH_HANDLER } from "./api/stage/stage-search";
 import { STAGE_ESTIMATOR_HANDLER } from "./api/stage/stage-estimator";
 import { STAGE_ESTIMATOR_DONE_HANDLER } from "./api/stage/stage-estimator-done";
+import { STAGE_ESTIMATOR_SELF_HANDLER } from "./api/stage/stage-estimator-self";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -93,7 +94,8 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("stage", STAGE_HANDLER, [
         new HTTPRouter("search", STAGE_SEARCH_HANDLER),
         new HTTPRouter("estimator", STAGE_ESTIMATOR_HANDLER, [
-            new HTTPRouter("done", STAGE_ESTIMATOR_DONE_HANDLER)
+            new HTTPRouter("done", STAGE_ESTIMATOR_DONE_HANDLER),
+            new HTTPRouter("self", STAGE_ESTIMATOR_SELF_HANDLER),
         ]),
     ])
 ]);
