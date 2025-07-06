@@ -24,7 +24,9 @@ export class SQLSearcher {
     }
 
     add(value: any, syntax: string) {
-        this.#params.push({value, syntax});
+        value instanceof Object
+            ? this.#params.push({value: JSON.stringify(value), syntax})
+            : this.#params.push({value, syntax});
     }
 
     /**

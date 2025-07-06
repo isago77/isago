@@ -82,3 +82,12 @@ CREATE TABLE `MoverReview`(
     FOREIGN KEY(`writerId`) REFERENCES `User`(`id`),
     FOREIGN KEY(`moverStageId`) REFERENCES `MoverStage`(`id`)
 );
+
+--changeset ttangkong:6
+CREATE TABLE `EstimatorAvailability`(
+    id CHAR(36) PRIMARY KEY,
+    estimatorId CHAR(36) NOT NULL,
+    date DATE,
+    count INT,
+    FOREIGN KEY(`estimatorId`) REFERENCES `User`(`id`)
+);

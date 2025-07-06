@@ -45,6 +45,12 @@ export namespace APISchema {
         note: z.string().optional()
     });
 
+    /** API 서버에서 표준적으로 단순 날짜를 정의하는 형식. */
+    export const date = z.string()
+        .min(10)
+        .max(10)
+        .refine(Test.isDate);
+
     /** API 서버에서 표준적으로 날짜와 시간을 정의하는 형식. (ISO 8601) */
     export const dateTime = z.string().min(19).max(29);
 

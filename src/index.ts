@@ -24,6 +24,8 @@ import { STAGE_SEARCH_HANDLER } from "./api/stage/stage-search";
 import { STAGE_ESTIMATOR_HANDLER } from "./api/stage/stage-estimator";
 import { STAGE_ESTIMATOR_DONE_HANDLER } from "./api/stage/stage-estimator-done";
 import { STAGE_ESTIMATOR_SELF_HANDLER } from "./api/stage/stage-estimator-self";
+import { STAGE_ESTIMATOR_AVAILABLE_HANDLER } from "./api/stage/stage-estimator-available";
+import { STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER } from "./api/stage/stage-estimator-available-search";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -35,6 +37,7 @@ export const DB_CLIENT = createPool({
     password: process.env.MARIADB_PASSWORD,
     database: process.env.MARIADB_DATABASE,
     connectionLimit: parseInt(process.env.MARIADB_POOL_LIMIT!),
+    dateStrings: true
 });
 
 export const REDIS_CLIENT = createClient({
@@ -63,6 +66,9 @@ export const REDIS_CLIENT = createClient({
 // stage
 // stage/search
 // stage/estimator
+// stage/estimator/done
+// stage/estimator/self
+// stage/estimator/available
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
         new HTTPRouter("verify", SIGN_UP_VERIFY_HANDLER),
@@ -96,6 +102,9 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
         new HTTPRouter("estimator", STAGE_ESTIMATOR_HANDLER, [
             new HTTPRouter("done", STAGE_ESTIMATOR_DONE_HANDLER),
             new HTTPRouter("self", STAGE_ESTIMATOR_SELF_HANDLER),
+            new HTTPRouter("available", STAGE_ESTIMATOR_AVAILABLE_HANDLER, [
+                new HTTPRouter("search", STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER)
+            ]),
         ]),
     ])
 ]);
