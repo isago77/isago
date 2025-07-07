@@ -11,6 +11,8 @@ const PostRequest = z.object({
     areas: z.array(z.string()),
     startDate: APISchema.date,
     endDate: APISchema.date,
+    minCount: z.number().min(1).default(1),
+    maxCount: z.number().min(1).optional()
 });
 
 export const STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER = new HTTPHandler({
@@ -36,6 +38,8 @@ export const STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER = new HTTPHandler({
 
         const searcher = new SQLSearcher();
         searcher.addIfDefined(given, "userId", "userId = ?");
+        searcher.addIfDefined(given, "maxCount", "a.count <= ?");
+        searcher.add(given.minCount, "a.count >= ?");
         searcher.add(given.areas, "JSON_OVERLAPS(b.serviceAreas, ?)");
 
         const result = await DB_CLIENT.query(
@@ -45,7 +49,7 @@ export const STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER = new HTTPHandler({
                 WHERE ${searcher.wheres}
                 AND a.date BETWEEN ? AND ?
             `,
-            [searcher.values, given.startDate, given.endDate]
+            [...searcher.values, given.startDate, given.endDate]
         );
 
         API.success(response, result);
