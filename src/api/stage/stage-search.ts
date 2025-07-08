@@ -13,7 +13,6 @@ const StageSearchRequest = z.object({
         "estimateCompleted",
         "waitingMover",
         "requestAccepted",
-        "paymentCompleted",
         "completed",
         "cancelled"
     ]).optional()

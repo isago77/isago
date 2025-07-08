@@ -11,8 +11,7 @@ CREATE TABLE `Stage`(
         'estimatorAssigned',    -- 견적 방문자 할당 됨
         'estimateCompleted',    -- 견적 완료
         'waitingMover',         -- 이사 업체 제안/수락 대기
-        'requestAccepted',      -- 특정 업체의 제안을 수락함
-        'paymentCompleted',     -- 결제 완료
+        'requestAccepted',      -- 특정 업체의 제안을 수락함 + 결제 완료
         'completed',            -- 이사 완료
         'cancelled'             -- 이사 최소
     ) NOT NULL,
