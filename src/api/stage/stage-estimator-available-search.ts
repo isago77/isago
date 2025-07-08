@@ -8,7 +8,7 @@ import { differenceInCalendarDays } from 'date-fns'
 
 const PostRequest = z.object({
     userId: APISchema.uuid.optional(),
-    areas: z.array(z.string()),
+    areas: z.array(z.string()).optional(),
     startDate: APISchema.date,
     endDate: APISchema.date,
     minCount: z.number().min(1).default(1),
@@ -35,15 +35,15 @@ export const STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER = new HTTPHandler({
         // 시작 날짜와 종료 날짜의 일자 차이는 31일이거나 그 이하여야 합니다.
         if (startDate < today
          || startDate > endDate
-         || diffInDays >= 31) {
+         || diffInDays > 31) {
             throw APIError.INVALID_REQUEST_FORMAT;
         }
 
         const searcher = new SQLSearcher();
         searcher.addIfDefined(given, "userId", "userId = ?");
         searcher.addIfDefined(given, "maxCount", "a.count <= ?");
+        searcher.addIfDefined(given, "areas", "JSON_OVERLAPS(b.serviceAreas, ?)");
         searcher.add(given.minCount, "a.count >= ?");
-        searcher.add(given.areas, "JSON_OVERLAPS(b.serviceAreas, ?)");
 
         const result = await DB_CLIENT.query(
             `
