@@ -7,13 +7,17 @@ import { DB_CLIENT } from "../..";
 import { SQLTransaction } from "../../sql/sql_transaction";
 import { StageStatus } from "./components/stage_status";
 
-const StageRequest = z.object({
+const StagePostRequest = z.object({
     availableId: APISchema.uuid.optional(),
     fromAddress: APISchema.address,
     toAddress: APISchema.address,
 }).refine(data => {
     // 출발 위치와 목표 위치는 서로 동일하지 않아야 합니다.
     return data.fromAddress.zipCode != data.toAddress.zipCode;
+});
+
+const StageGetRequest = z.object({
+    uuid: APISchema.uuid,
 });
 
 class StageError {
@@ -23,7 +27,7 @@ class StageError {
 
 export const STAGE_HANDLER = new HTTPHandler({
     post: Auth.delegate(async (_, response, body, userId) => {
-        const given = API.tryParseJSON(StageRequest, body);
+        const given = API.tryParseJSON(StagePostRequest, body);
         const uuid = API.createUUID();
         const from = JSON.stringify(given.fromAddress);
         const to = JSON.stringify(given.toAddress);
@@ -67,12 +71,17 @@ export const STAGE_HANDLER = new HTTPHandler({
 
         API.success(response, {uuid});
     }),
-    get: Auth.delegate(async (_1, response, _2, userId) => {
-        const result = await DB_CLIENT.query(
-            "SELECT * FROM Stage WHERE userId = ? ORDER BY createdAt DESC",
-            [userId]
+    get: Auth.delegate(async (request, response, _, userId) => {
+        const given = API.tryParseURL(StageGetRequest, API.urlOf(request));
+
+        const [row] = await DB_CLIENT.query(
+            "SELECT * FROM Stage WHERE id = ? ORDER BY createdAt DESC",
+            [given.uuid]
         );
 
-        API.success(response, result);
+        // 유효하지 않은 UUID인 경우.
+        if (!row) throw APIError.INVALID_UUID;
+
+        API.success(response, row);
     }),
 });

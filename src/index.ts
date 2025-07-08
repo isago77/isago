@@ -27,6 +27,7 @@ import { STAGE_ESTIMATOR_SELF_HANDLER } from "./api/stage/stage-estimator-self";
 import { STAGE_ESTIMATOR_AVAILABLE_HANDLER } from "./api/stage/stage-estimator-available";
 import { STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER } from "./api/stage/stage-estimator-available-search";
 import { STAGE_MOVER_REQUEST_HANDLER } from "./api/stage/stage-mover-request";
+import { STAGE_SELF_HANDLER } from "./api/stage/stage-self";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -65,11 +66,13 @@ export const REDIS_CLIENT = createClient({
 // image/profile
 // issue/role-serial
 // stage
+// stage/self
 // stage/search
 // stage/estimator
 // stage/estimator/done
 // stage/estimator/self
 // stage/estimator/available
+// stage/mover/request
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
         new HTTPRouter("verify", SIGN_UP_VERIFY_HANDLER),
@@ -99,6 +102,7 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
         new HTTPRouter("role-serial", ISSUE_ROLE_SERIAL_HANDLER)
     ]),
     new HTTPRouter("stage", STAGE_HANDLER, [
+        new HTTPRouter("self", STAGE_SELF_HANDLER),
         new HTTPRouter("search", STAGE_SEARCH_HANDLER),
         new HTTPRouter("estimator", STAGE_ESTIMATOR_HANDLER, [
             new HTTPRouter("done", STAGE_ESTIMATOR_DONE_HANDLER),
