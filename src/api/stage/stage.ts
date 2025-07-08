@@ -11,6 +11,9 @@ const StageRequest = z.object({
     availableId: APISchema.uuid.optional(),
     fromAddress: APISchema.address,
     toAddress: APISchema.address,
+}).refine(data => {
+    // 출발 위치와 목표 위치는 서로 동일하지 않아야 합니다.
+    return data.fromAddress.zipCode != data.toAddress.zipCode;
 });
 
 class StageError {
