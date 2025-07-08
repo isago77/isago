@@ -13,8 +13,11 @@ const PostRequest = z.object({
     endDate: APISchema.date,
     minCount: z.number().min(1).default(1),
     maxCount: z.number().min(1).optional()
+}).refine((data) => {
+    return !data.maxCount || data.maxCount >= data.minCount;
 });
 
+// stage/estimator/available/search
 export const STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
         const given = API.tryParseJSON(PostRequest, body);
