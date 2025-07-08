@@ -42,10 +42,10 @@ export const STAGE_ESTIMATOR_AVAILABLE_HANDLER = new HTTPHandler({
             [userId, given.date]
         );
 
-        const uuid = row.id ?? API.createUUID();
+        const uuid = row?.id ?? API.createUUID();
 
         // 이미 별도의 테이블이 생성되어 존재하는 경우.
-        if (row.id != null) {
+        if (row) {
             await DB_CLIENT.query(
                 "UPDATE EstimatorAvailability SET count = ? WHERE id = ?",
                 [given.count, row.id]

@@ -1,7 +1,7 @@
 import { DB_CLIENT } from "..";
 
 /** 클라이언트 측에서 한 번에 조회할 수 있는 아이템들의 개수. */
-const SEARCH_MAX_COUNT = 15;
+export const SEARCH_MAX_COUNT = 15;
 
 export enum SearchSort {
     newest = "newest",
