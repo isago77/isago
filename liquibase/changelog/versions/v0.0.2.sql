@@ -26,7 +26,7 @@ CREATE TABLE `EstimatorStage`(
     `id` CHAR(36) PRIMARY KEY,
     `stageId` CHAR(36) NOT NULL,
     `estimatorId` CHAR(36) NOT NULL,
-    `visitDate` DATETIME,
+    `visitDate` DATE,
     `location` JSON,
     `details` JSON,
     `status` ENUM(

@@ -45,7 +45,7 @@ export const STAGE_HANDLER = new HTTPHandler({
 
             if (hasEstimator) {
                 const [row] = await db.query(
-                    "SELECT estimatorId FROM EstimatorAvailability WHERE id = ?",
+                    "SELECT estimatorId, date FROM EstimatorAvailability WHERE id = ?",
                     given.availableId
                 );
 
@@ -63,8 +63,8 @@ export const STAGE_HANDLER = new HTTPHandler({
                 }
 
                 await db.query(
-                    "INSERT INTO EstimatorStage(id, stageId, estimatorId) VALUES(?, ?, ?)",
-                    [API.createUUID(), uuid, row.estimatorId]
+                    "INSERT INTO EstimatorStage(id, stageId, estimatorId, visitDate) VALUES(?, ?, ?, ?)",
+                    [API.createUUID(), uuid, row.estimatorId, row.date]
                 );
             }
         });

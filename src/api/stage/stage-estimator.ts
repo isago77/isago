@@ -20,7 +20,7 @@ const StageEstimatorGetRequest = z.object({
 
 const StageEstimatorPatchRequest = z.object({
     uuid: APISchema.uuid,
-    visitDate: APISchema.dateTime.optional(),
+    visitDate: APISchema.date.optional(),
     location: z.string().optional(),
     details: z.array(z.any()).optional(),
     status: z.enum(["waiting", "visiting", "visited"]).optional()
