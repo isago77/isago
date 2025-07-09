@@ -30,6 +30,7 @@ import { STAGE_MOVER_REQUEST_HANDLER } from "./api/stage/stage-mover-request";
 import { STAGE_SELF_HANDLER } from "./api/stage/stage-self";
 import { STAGE_MOVER_PAYMENT_HANDLER } from "./api/stage/stage-mover-payment";
 import { STAGE_MOVER_PAYMENT_CONFIRM_HANDLER } from "./api/stage/stage-mover-payment-confirm";
+import { IMAGE_ESTIMATOR_HANDLER } from "./api/image-estimator";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -98,7 +99,8 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
         new HTTPRouter("role", PROFILE_ROLE_HANDLER),
     ]),
     new HTTPRouter("image", PROFILE_HANDLER, [
-        new HTTPRouter("profile", IMAGE_PROFILE_HANDLER)
+        new HTTPRouter("profile", IMAGE_PROFILE_HANDLER),
+        new HTTPRouter("estimator", IMAGE_ESTIMATOR_HANDLER)
     ]),
     new HTTPRouter("issue", undefined, [
         new HTTPRouter("role-serial", ISSUE_ROLE_SERIAL_HANDLER)
