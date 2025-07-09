@@ -63,7 +63,7 @@ CREATE TABLE `MoverStage`(
         'working',  -- 이사 작업하는 중
         'finished', -- 작업자가 이사 작업 완료 표시
         'completed' -- 사용자가 이사 작업 완료 표시
-    ),
+    ) NOT NULL,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
     FOREIGN KEY(`requestId`) REFERENCES `MoverRequest`(`id`)

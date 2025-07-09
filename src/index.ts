@@ -28,6 +28,8 @@ import { STAGE_ESTIMATOR_AVAILABLE_HANDLER } from "./api/stage/stage-estimator-a
 import { STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER } from "./api/stage/stage-estimator-available-search";
 import { STAGE_MOVER_REQUEST_HANDLER } from "./api/stage/stage-mover-request";
 import { STAGE_SELF_HANDLER } from "./api/stage/stage-self";
+import { STAGE_MOVER_PAYMENT_HANDLER } from "./api/stage/stage-mover-payment";
+import { STAGE_MOVER_PAYMENT_CONFIRM_HANDLER } from "./api/stage/stage-mover-payment-confirm";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -112,7 +114,10 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
             ]),
         ]),
         new HTTPRouter("mover", undefined, [
-            new HTTPRouter("request", STAGE_MOVER_REQUEST_HANDLER)
+            new HTTPRouter("request", STAGE_MOVER_REQUEST_HANDLER),
+            new HTTPRouter("payment", STAGE_MOVER_PAYMENT_HANDLER, [
+                new HTTPRouter("confirm", STAGE_MOVER_PAYMENT_CONFIRM_HANDLER)
+            ]),
         ])
     ])
 ]);

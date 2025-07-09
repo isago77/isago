@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
-import { DB_CLIENT, REDIS_CLIENT } from "..";
+import { REDIS_CLIENT } from "..";
 import { Auth } from "./components/auth";
 import { SQLTransaction } from "../sql/sql_transaction";
 

@@ -21,7 +21,7 @@ export class StageMoverRequestError {
     static ALREADY_MOVER_REQUEST = new APIError("ALREADY_MOVER_REQUEST", 400);
 }
 
-// stage/mover
+// stage/mover/request
 export const STAGE_MOVER_REQUEST_HANDLER = new HTTPHandler({
     post: Auth.delegate(async (_, response, body, userId) => {
         const given = API.tryParseJSON(StageMoverRequestRequest, body);
