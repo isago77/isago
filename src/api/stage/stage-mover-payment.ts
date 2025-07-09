@@ -11,6 +11,9 @@ export const StageMoverPaymentRequest = z.object({
 class StageMoverPaymentError {
     /** 해당 상품을 결제해야 하는 대상이 아닐 때. */
     static INVALID_PAYMENT_TARGET = new APIError("INVALID_PAYMENT_TARGET", 400);
+
+    /** 이미 해당 이사 절차에서 결제가 완료되었을 때. */
+    static ALREADY_PAYMENT = new APIError("ALREADY_PAYMENT", 400);
 }
 
 // stage/mover/payment
@@ -29,6 +32,16 @@ export const STAGE_MOVER_PAYMENT_HANDLER = new HTTPHandler({
         // 해당 상품을 결제해야 하는 대상이 아닌 경우.
         if (row.userId != userId) {
             throw StageMoverPaymentError.INVALID_PAYMENT_TARGET;
+        }
+
+        const result = await DB_CLIENT.query(
+            "SELECT 1 FROM MoverStage WHERE requestId = ? LIMIT 1",
+            [given.requestId]
+        );
+
+        // 이미 해당 이사 절차에서 결제가 완료된 경우.
+        if (!result.isEmpty) {
+            throw StageMoverPaymentError.ALREADY_PAYMENT;
         }
 
         const amount = row.proposedPrice;

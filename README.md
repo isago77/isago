@@ -31,7 +31,7 @@ ASSETS_SERVER_HOST=localhost
 ASSETS_SERVER_PORT=8081
 ASSETS_SERVER_API_KEY=...
 
-# 결제 수단인 토스 API에 대한 필수 설정.
+# 결제 수단인 토스페이먼츠 API에 대한 필수 설정.
 TOSS_SECRET_KEY=...
 ```
 
