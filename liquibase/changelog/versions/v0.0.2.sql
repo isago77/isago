@@ -44,7 +44,6 @@ CREATE TABLE `MoverRequest`(
     `id` CHAR(36) PRIMARY KEY,
     `stageId` CHAR(36) NOT NULL,
     `moverId` CHAR(36) NOT NULL,
-    `proposedDate` DATETIME NOT NULL,
     `proposedPrice` INT NOT NULL,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
@@ -56,6 +55,8 @@ CREATE TABLE `MoverStage`(
     `id` CHAR(36) PRIMARY KEY,
     `stageId` CHAR(36) NOT NULL,
     `requestId` CHAR(36) NOT NULL UNIQUE,
+    `visitDate` DATE,
+    `visitTime` TIME,
     `location` JSON,
     `status` ENUM(
         'waiting',  -- 준비 또는 대기 중

@@ -9,7 +9,6 @@ import { User, UserError, UserRole } from "../components/user";
 
 const StageMoverRequestRequest = z.object({
     uuid: APISchema.uuid,
-    proposedDate: APISchema.dateTime,
     proposedPrice: z.number()
 });
 
@@ -59,8 +58,8 @@ export const STAGE_MOVER_REQUEST_HANDLER = new HTTPHandler({
         const uuid = API.createUUID();
 
         await DB_CLIENT.query(
-            "INSERT INTO MoverRequest(id, stageId, moverId, proposedDate, proposedPrice) VALUES (?, ?, ?, ?, ?)",
-            [uuid, given.uuid, userId, given.proposedDate, given.proposedPrice]
+            "INSERT INTO MoverRequest(id, stageId, moverId, proposedPrice) VALUES (?, ?, ?, ?, ?)",
+            [uuid, given.uuid, userId, given.proposedPrice]
         );
 
         API.success(response, {uuid})
