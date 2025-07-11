@@ -40,7 +40,7 @@ export const STAGE_MOVER_PAYMENT_HANDLER = new HTTPHandler({
         );
 
         // 이미 해당 이사 절차에서 결제가 완료된 경우.
-        if (!result.isEmpty) {
+        if (result.length != 0) {
             throw StageMoverPaymentError.ALREADY_PAYMENT;
         }
 

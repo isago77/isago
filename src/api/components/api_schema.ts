@@ -62,6 +62,7 @@ export namespace APISchema {
     }
 
     export namespace Search {
+        export const page = z.coerce.number().min(0).default(0);
         export const sort = z.enum(["oldest", "newest"]).default("newest");
     }
 }

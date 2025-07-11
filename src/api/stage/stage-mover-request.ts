@@ -16,7 +16,7 @@ const StageMoverRequestPostRequest = z.object({
 
 const StageMoverRequestGetRequest = z.object({
     stageId: APISchema.uuid,
-    page: z.number().min(0).default(0),
+    page: APISchema.Search.page,
     sort: APISchema.Search.sort,
 });
 

@@ -6,7 +6,7 @@ import { SEARCH_MAX_COUNT, SQLSearcher } from "../../sql/sql_searcher";
 import { APISchema } from "../components/api_schema";
 
 export const StageEstimatorSelfRequest = z.object({
-    page: z.coerce.number().default(0),
+    page: APISchema.Search.page,
     sort: APISchema.Search.sort,
     status: z.enum([
         "waiting",

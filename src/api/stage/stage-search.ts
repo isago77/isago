@@ -7,7 +7,7 @@ import { DB_CLIENT } from "../..";
 import { APISchema } from "../components/api_schema";
 
 const StageSearchRequest = z.object({
-    page: z.coerce.number().default(0),
+    page: APISchema.Search.page,
     sort: APISchema.Search.sort,
     status: z.enum([
         "waitingEstimator",
