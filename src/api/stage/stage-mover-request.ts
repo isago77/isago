@@ -6,11 +6,18 @@ import { API } from "core/src";
 import { DB_CLIENT } from "../..";
 import { StageStatus } from "./components/stage_status";
 import { User, UserError, UserRole } from "../components/user";
+import { SQLSearcher } from "../../sql/sql_searcher";
 
-const StageMoverRequestRequest = z.object({
+const StageMoverRequestPostRequest = z.object({
     uuid: APISchema.uuid,
     proposedPrice: z.number(),
     note: z.string().optional(),
+});
+
+const StageMoverRequestGetRequest = z.object({
+    stageId: APISchema.uuid,
+    page: z.number().min(0).default(0),
+    sort: APISchema.Search.sort,
 });
 
 export class StageMoverRequestError {
@@ -24,7 +31,7 @@ export class StageMoverRequestError {
 // stage/mover/request
 export const STAGE_MOVER_REQUEST_HANDLER = new HTTPHandler({
     post: Auth.delegate(async (_, response, body, userId) => {
-        const given = API.tryParseJSON(StageMoverRequestRequest, body);
+        const given = API.tryParseJSON(StageMoverRequestPostRequest, body);
         const role = await User.roleOf(userId);
 
         // 사용자가 전용 권한을 가진 이사 업체 또는 관리자가 아닌 경우.
@@ -64,5 +71,18 @@ export const STAGE_MOVER_REQUEST_HANDLER = new HTTPHandler({
         );
 
         API.success(response, {uuid})
+    }),
+    get: Auth.delegate(async (request, response, _1, _2) => {
+        const given = API.tryParseURL(StageMoverRequestGetRequest, API.urlOf(request));
+        const searcher = new SQLSearcher();
+        searcher.add(given.stageId, "stageId = ?");
+
+        const result = await searcher.search(
+            "MoverRequest",
+            given.page,
+            given.sort,
+        );
+
+        API.success(response, result);
     })
 });

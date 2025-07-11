@@ -60,4 +60,8 @@ export namespace APISchema {
             .min(2)
             .max(15)
     }
+
+    export namespace Search {
+        export const sort = z.enum(["oldest", "newest"]).default("newest");
+    }
 }

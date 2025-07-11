@@ -3,10 +3,11 @@ import { API, HTTPHandler } from "core";
 import { Auth } from "../components/auth";
 import { DB_CLIENT } from "../..";
 import { SEARCH_MAX_COUNT, SQLSearcher } from "../../sql/sql_searcher";
+import { APISchema } from "../components/api_schema";
 
 export const StageEstimatorSelfRequest = z.object({
     page: z.coerce.number().default(0),
-    sort: z.enum(["newest", "oldest"]).default("newest"),
+    sort: APISchema.Search.sort,
     status: z.enum([
         "waiting",
         "visiting",

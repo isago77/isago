@@ -3,10 +3,7 @@ import { DB_CLIENT } from "..";
 /** 클라이언트 측에서 한 번에 조회할 수 있는 아이템들의 개수. */
 export const SEARCH_MAX_COUNT = 15;
 
-export enum SearchSort {
-    newest = "newest",
-    oldest = "oldest"
-}
+export type SearchSort = "newest" | "oldest";
 
 export class SQLSearcher {
     #params: {value: any, syntax: string}[] = [];
@@ -51,7 +48,7 @@ export class SQLSearcher {
 
     async search(tableName: string, page: number, sort: SearchSort) {
         const offset = page * SEARCH_MAX_COUNT;
-        const orderBy = sort == SearchSort.newest
+        const orderBy = sort == "newest"
             ? `createdAt DESC`
             : `createdAt ASC`;
 
