@@ -45,6 +45,7 @@ CREATE TABLE `MoverRequest`(
     `stageId` CHAR(36) NOT NULL,
     `moverId` CHAR(36) NOT NULL,
     `proposedPrice` INT NOT NULL,
+    `note` TEXT,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
     FOREIGN KEY(`moverId`) REFERENCES `User`(`id`)
