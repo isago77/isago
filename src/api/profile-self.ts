@@ -7,7 +7,7 @@ import { SQLModifier } from "../sql/sql_modifer";
 import { SQLTransaction } from "../sql/sql_transaction";
 
 const Link = z.object({
-    label: z.string(),
+    label: z.string().nullable(),
     url: APISchema.url
 });
 
