@@ -1,8 +1,8 @@
 
-export enum StageEstimatorStatus {
+export enum StageMoverStatus {
     waiting = "waiting",
     visiting = "visiting",
-    visited = "visited",
+    working = "visited",
     completed = "completed",
     cancelled = "cancelled"
 }

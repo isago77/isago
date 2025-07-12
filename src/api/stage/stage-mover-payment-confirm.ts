@@ -1,16 +1,23 @@
-import { API, APIError, HTTPHandler } from "core";
 import z from "zod";
+import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "../components/api_schema";
-import { config } from "dotenv";
-import axios from "axios";
 import { DB_CLIENT, REDIS_CLIENT } from "../..";
 import { SQLTransaction } from "../../sql/sql_transaction";
 import { StageStatus } from "./components/stage_status";
+import { Payment } from "../components/payment";
 
-config();
-
-/** 토스페이먼츠 API에 대한 시크릿 키. */
-const secretKey = process.env.TOSS_SECRET_KEY;
+/** 주어진 데이터를 기반으로 토스페이먼츠 측 결제를 시도합니다. */
+async function confirm(data: {
+    paymentKey: string;
+    orderId: string;
+    amount: number;
+}) {
+    try {
+        return await Payment.confirm(data);
+    } catch (error) {
+        throw StageMoverPaymentConfirmError.INVALID_PAYMENT;
+    }
+}
 
 /** 서버 측에서 정의한 이사 절차의 결제 정보에 대한 데이터 형태. */
 export const MoverStageOrder = z.object({
@@ -23,28 +30,6 @@ export const StageMoverPaymentConfirmRequest = z.object({
     orderId: APISchema.uuid,
     amount: z.number().min(0)
 });
-
-/** 주어진 데이터를 기반으로 토스페이먼츠 측 결제를 시도합니다. */
-async function confirm(data: {
-    paymentKey: string;
-    orderId: string;
-    amount: number;
-}) {
-    const encryptedSecretKey =
-        `Basic ${Buffer.from(secretKey + ':').toString('base64')}`;
-
-    try {
-        return await axios.post(
-            "https://api.tosspayments.com/v1/payments/confirm", data, {
-            headers: {
-                Authorization: encryptedSecretKey,
-                "Content-Type": "application/json"
-            }
-        });
-    } catch (error) {
-        throw StageMoverPaymentConfirmError.INVALID_PAYMENT;
-    }
-}
 
 class StageMoverPaymentConfirmError {
     /** 이미 만료되었거나 유효하지 않은 토스페이먼츠 결제 요청일 때. */
@@ -90,8 +75,8 @@ export const STAGE_MOVER_PAYMENT_CONFIRM_HANDLER = new HTTPHandler({
 
         await SQLTransaction.perform(async (db) => {
             await db.query(
-                "INSERT INTO MoverStage(id, stageId, requestId) VALUES(?, ?, ?)",
-                [uuid, row.stageId, row.id]
+                "INSERT INTO MoverStage(id, stageId, requestId, paymentKey) VALUES(?, ?, ?, ?)",
+                [uuid, row.stageId, row.id, given.paymentKey]
             );
 
             await db.query(

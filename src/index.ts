@@ -33,6 +33,7 @@ import { STAGE_MOVER_PAYMENT_CONFIRM_HANDLER } from "./api/stage/stage-mover-pay
 import { IMAGE_ESTIMATOR_HANDLER } from "./api/image-estimator";
 import { STAGE_MOVER_REQUEST_COUNT_HANDLER } from "./api/stage/stage-mover-request-count";
 import { IMAGE_BANNER_HANDLER } from "./api/image-banner";
+import { STAGE_CANCEL_HANDLER } from "./api/stage/stage-cancel";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -111,6 +112,7 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("stage", STAGE_HANDLER, [
         new HTTPRouter("self", STAGE_SELF_HANDLER),
         new HTTPRouter("search", STAGE_SEARCH_HANDLER),
+        new HTTPRouter("cancel", STAGE_CANCEL_HANDLER),
         new HTTPRouter("estimator", STAGE_ESTIMATOR_HANDLER, [
             new HTTPRouter("done", STAGE_ESTIMATOR_DONE_HANDLER),
             new HTTPRouter("self", STAGE_ESTIMATOR_SELF_HANDLER),

@@ -30,10 +30,11 @@ CREATE TABLE `EstimatorStage`(
     `location` JSON,
     `details` JSON,
     `status` ENUM(
-        'waiting',  -- 준비 또는 대기 중
-        'visiting', -- 목표 집으로 이동 중
-        'visited',  -- 방문하여 견적 중
-        'completed' -- 견적 완료
+        'waiting',      -- 준비 또는 대기 중
+        'visiting',     -- 목표 집으로 이동 중
+        'visited',      -- 방문하여 견적 중
+        'completed',    -- 견적 완료
+        'cancelled'     -- 견적 취소
     ) NOT NULL,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
     FOREIGN KEY(`estimatorId`) REFERENCES `User`(`id`)
@@ -60,12 +61,14 @@ CREATE TABLE `MoverStage`(
     `visitTime` TIME,
     `location` JSON,
     `status` ENUM(
-        'waiting',  -- 준비 또는 대기 중
-        'visiting', -- 목표 집으로 이동 중
-        'working',  -- 이사 작업하는 중
-        'finished', -- 작업자가 이사 작업 완료 표시
-        'completed' -- 사용자가 이사 작업 완료 표시
+        'waiting',      -- 준비 또는 대기 중
+        'visiting',     -- 목표 집으로 이동 중
+        'working',      -- 이사 작업하는 중
+        'completed',    -- 사용자가 이사 작업 완료 표시
+        'cancelled'     -- 사용자 또는 이사 업체가 이사 작업을 취소
     ) NOT NULL,
+    `paymentKey` VARCHAR(200) NOT NULL,
+    `canceller` CHAR(36),
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
     FOREIGN KEY(`requestId`) REFERENCES `MoverRequest`(`id`)
