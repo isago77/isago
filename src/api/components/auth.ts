@@ -1,12 +1,19 @@
+import * as http from "http";
 import { BinaryLike, createHash, randomBytes } from "crypto";
 import { DB_CLIENT, REDIS_CLIENT } from "../..";
-import * as http from "http";
-import { APIError, HTTPHandlerListener } from "core";
+import { HTTPException, HTTPHandlerListener } from "core";
+import { WebSocket } from "ws";
 
 export type HTTPAuthHandlerListener = (
     request: http.IncomingMessage,
     response: http.ServerResponse,
     requestBody: Buffer,
+    userId: string,
+) => Promise<void> | void;
+
+export type WSAuthHandlerListener = (
+    ws: WebSocket,
+    request: http.IncomingMessage,
     userId: string,
 ) => Promise<void> | void;
 
@@ -111,6 +118,7 @@ export class Auth {
         return result;
     }
 
+    /** HTTP 요청에서 사용자 인증을 대신 처리해주는 일종의 핸들러입니다. */
     static delegate(listener: HTTPAuthHandlerListener): HTTPHandlerListener {
         return async (request, response, body) => {
             const accessToken = request.headers.authorization;
@@ -128,6 +136,35 @@ export class Auth {
             }
 
             await listener(request, response, body, userId);
+        }
+    }
+
+    /**
+     * HTTP 웹 소켓 연결에서 사용자 인증을 대신 처리해주는 일종의 핸들러입니다.
+     * 또한 예외적으로 현재 웹 소켓 처리 작업에서는 모두 사용자 인증을 요구하므로
+     * 별도의 예외 처리도 위임하여 처리합니다.
+     */
+    static delegateWS(listener: WSAuthHandlerListener) {
+        return async (ws: WebSocket, request: http.IncomingMessage) => {
+            try {
+                const accessToken = request.headers.authorization;
+                if (!accessToken) {
+                    ws.close(4001, "Unauthorized");
+                    return;
+                }
+
+                const userId = await this.userIdOf(accessToken);
+                if (!userId) {
+                    ws.close(4001, "Unauthorized");
+                    return;
+                }
+
+                await listener(ws, request, userId);
+            } catch (error) {
+                error instanceof HTTPException
+                    ? ws.close(4000 + error.code, error.message)
+                    : ws.close(1011, "Internal Server Error");
+            }
         }
     }
 }

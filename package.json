@@ -7,16 +7,19 @@
     "setup": "docker compose up"
   },
   "devDependencies": {
+    "@teppeis/multimaps": "^3.0.0",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^22.3.0",
     "@types/nodemailer": "^6.4.16",
     "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.18.1",
     "axios": "^1.10.0",
     "cookie": "^1.0.1",
     "core": "file:src/submodules/core",
     "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "libphonenumber-js": "^1.12.9",
     "mariadb": "^3.4.2",
@@ -30,6 +33,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
     "uuid": "^10.0.0",
+    "ws": "^8.18.3",
     "zod": "^3.25.67"
   }
 }

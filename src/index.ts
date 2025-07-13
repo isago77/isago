@@ -37,6 +37,7 @@ import { STAGE_CANCEL_HANDLER } from "./api/stage/stage-cancel";
 import { STAGE_MOVER_HANDLER } from "./api/stage/stage-mover";
 import { STAGE_MOVER_DONE_HANDLER } from "./api/stage/stage-mover-done";
 import { STAGE_MOVER_SELF_HANDLER } from "./api/stage/stage-mover-self";
+import { CHAT_HANDLER } from "./api/chat";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -59,29 +60,7 @@ export const REDIS_CLIENT = createClient({
     password: process.env.REDIS_PASSWORD
 });
 
-// sign-up
-// sign-up/auth
-// sign-up/oauth
-// sign-in
-// sign-in/reissue
-// sign-in/oauth
-// reset-password
-// reset-password/auth
-// profile
-// profile/self
-// profile/role
-// auth/phone-number
-// auth/phone-number/verify
-// image/profile
-// issue/role-serial
-// stage
-// stage/self
-// stage/search
-// stage/estimator
-// stage/estimator/done
-// stage/estimator/self
-// stage/estimator/available
-// stage/mover/request
+// 자세한 내용은 API 문서를 참고하세요.
 const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("sign-up", SIGN_UP_HANDLER, [
         new HTTPRouter("verify", SIGN_UP_VERIFY_HANDLER),
@@ -134,9 +113,10 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
             new HTTPRouter("self", STAGE_MOVER_SELF_HANDLER),
         ]),
     ]),
+    new HTTPRouter("chat", CHAT_HANDLER),
 ]);
 
-const server = http.createServer(async (request, response) => {
+export const server = http.createServer(async (request, response) => {
     if (request.url === undefined) return;
 
     try {
@@ -153,3 +133,6 @@ const server = http.createServer(async (request, response) => {
 server.listen(8080, undefined, undefined, () => {
     REDIS_CLIENT.connect();
 });
+
+// 웹소켓 관련 코드 초기화.
+import "./socket/chat";
