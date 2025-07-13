@@ -50,7 +50,7 @@ export const STAGE_MOVER_DONE_HANDLER = new HTTPHandler({
 
         await SQLTransaction.perform(async (db) => {
             await db.query(
-                "UPDATE Stage SET status = ? WHERE id = ?",
+                "UPDATE Stage SET status = ?, endedAt = CURRENT_TIMESTAMP WHERE id = ?",
                 [StageStatus.completed, stageId]
             );
 

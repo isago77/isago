@@ -44,7 +44,7 @@ export const STAGE_CANCEL_HANDLER = new HTTPHandler({
         // 해당 이사 절차에서 최종적으로 취소를 명시적으로 정의합니다.
         async function ensureCancelled(db: Pool | PoolConnection) {
             await db.query(
-                "UPDATE Stage SET status = ? WHERE id = ?",
+                "UPDATE Stage SET status = ?, endedAt = CURRENT_TIMESTAMP WHERE id = ?",
                 [StageStatus.cancelled, given.uuid]
             );
         }
