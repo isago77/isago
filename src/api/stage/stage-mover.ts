@@ -4,6 +4,7 @@ import { APISchema } from "../components/api_schema";
 import { Auth } from "../components/auth";
 import { DB_CLIENT } from "../..";
 import { SQLModifier } from "../../sql/sql_modifer";
+import { User, UserRole } from "../components/user";
 
 const StageMoverPatchRequest = z.object({
     uuid: APISchema.uuid,
@@ -11,6 +12,11 @@ const StageMoverPatchRequest = z.object({
     visitTime: APISchema.time.optional(),
     location: z.string().optional(),
     status: z.enum(["waiting", "visiting", "working"]).optional()
+});
+
+const StageMoverGetRequest = z.object({
+    // 사용자의 이사 절차에 대한 UUID
+    stageId: APISchema.uuid,
 });
 
 export class StageMoverError {
@@ -62,5 +68,43 @@ export const STAGE_MOVER_HANDLER = new HTTPHandler({
         });
 
         API.success(response, undefined);
+    }),
+    get: Auth.delegate(async (request, response, _, userId) => {
+        const given = API.tryParseURL(StageMoverGetRequest, API.urlOf(request));
+
+        const fields = [
+            "id",
+            "stageId",
+            "requestId",
+            "visitDate",
+            "visitTime",
+            "location",
+            "status",
+            "canceller",
+            "createdAt",
+        ];
+
+        const [row] = await DB_CLIENT.query(
+            `SELECT ${fields.join(", ")} FROM MoverStage WHERE stageId = ?`,
+            [given.stageId]
+        );
+
+        // 유효하지 않은 UUID인 경우.
+        if (!row) throw APIError.INVALID_UUID;
+
+        // 해당 이사 절차의 사용자이거나 이사 업체가 아닌 경우,
+        // 이사 업체 또는 관리자가 아닌 경우 접근할 수 없음.
+        if (row.moverId != userId && row.userId != userId) {
+            const role = await User.roleOf(userId);
+
+            if (role != UserRole.mover
+             && role != UserRole.admin) {
+                response.writeHead(403);
+                response.end();
+                return;
+            }
+        }
+
+        API.success(response, row);
     })
 });

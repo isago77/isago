@@ -118,7 +118,6 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
     }),
     get: Auth.delegate(async (request, response, _, userId) => {
         const given = API.tryParseURL(StageEstimatorGetRequest, API.urlOf(request));
-        const role = await User.roleOf(userId);
 
         const fields = [
             "a.id",
@@ -142,6 +141,8 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
         // 해당 이사 절차의 사용자이거나 견적 방문자가 아닌 경우,
         // 이사 업체 또는 관리자가 아닌 경우 접근할 수 없음.
         if (row.estimatorId != userId && row.userId != userId) {
+            const role = await User.roleOf(userId);
+
             if (role != UserRole.mover
              && role != UserRole.admin) {
                 response.writeHead(403);
