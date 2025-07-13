@@ -14,4 +14,9 @@ export namespace Test {
     export function isDate(text: string) {
         return /[0-9]{4}-[0-9]{2}-[0-9]{2}/g.test(text);
     }
+
+    /** 주어진 문자열이 시간 형식인지 간단한 여부를 반환합니다. (e.g. HH:MM:SS) */
+    export function isTime(text: string) {
+        return /[0-9]{2}:[0-9]{2}:[0-9]{2}/g.test(text);
+    }
 }

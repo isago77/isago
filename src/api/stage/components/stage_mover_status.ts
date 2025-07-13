@@ -2,7 +2,7 @@
 export enum StageMoverStatus {
     waiting = "waiting",
     visiting = "visiting",
-    working = "visited",
+    working = "working",
     completed = "completed",
     cancelled = "cancelled"
 }

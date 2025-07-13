@@ -34,6 +34,8 @@ import { IMAGE_ESTIMATOR_HANDLER } from "./api/image-estimator";
 import { STAGE_MOVER_REQUEST_COUNT_HANDLER } from "./api/stage/stage-mover-request-count";
 import { IMAGE_BANNER_HANDLER } from "./api/image-banner";
 import { STAGE_CANCEL_HANDLER } from "./api/stage/stage-cancel";
+import { STAGE_MOVER_HANDLER } from "./api/stage/stage-mover";
+import { STAGE_MOVER_DONE_HANDLER } from "./api/stage/stage-mover-done";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -95,7 +97,7 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("auth", undefined, [
         new HTTPRouter("phone-number", AUTH_PHONE_NUMBER_HANDLER, [
             new HTTPRouter("verify", AUTH_PHONE_NUMBER_VERIFY_HANDLER)
-        ])
+        ]),
     ]),
     new HTTPRouter("profile", PROFILE_HANDLER, [
         new HTTPRouter("self", PROFILE_SELF_HANDLER),
@@ -120,15 +122,16 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
                 new HTTPRouter("search", STAGE_ESTIMATOR_AVAILABLE_SEARCH_HANDLER)
             ]),
         ]),
-        new HTTPRouter("mover", undefined, [
+        new HTTPRouter("mover", STAGE_MOVER_HANDLER, [
             new HTTPRouter("request", STAGE_MOVER_REQUEST_HANDLER, [
                 new HTTPRouter("count", STAGE_MOVER_REQUEST_COUNT_HANDLER)
             ]),
             new HTTPRouter("payment", STAGE_MOVER_PAYMENT_HANDLER, [
                 new HTTPRouter("confirm", STAGE_MOVER_PAYMENT_CONFIRM_HANDLER)
             ]),
-        ])
-    ])
+            new HTTPRouter("done", STAGE_MOVER_DONE_HANDLER),
+        ]),
+    ]),
 ]);
 
 const server = http.createServer(async (request, response) => {
