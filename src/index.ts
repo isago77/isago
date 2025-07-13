@@ -49,7 +49,15 @@ export const DB_CLIENT = createPool({
     password: process.env.MARIADB_PASSWORD,
     database: process.env.MARIADB_DATABASE,
     connectionLimit: parseInt(process.env.MARIADB_POOL_LIMIT!),
-    dateStrings: true
+    dateStrings: true,
+    typeCast: (field, next) => {
+        // TINYINT(1)은 사실상 Boolean 이므로 이를 변환.
+        if (field.type == "TINY" && field.columnLength == 1) {
+            return field.string() == "1";
+        }
+
+        return next();
+    }
 });
 
 export const REDIS_CLIENT = createClient({
