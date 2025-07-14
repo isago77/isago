@@ -3,7 +3,7 @@ import { APISchema } from "../api/components/api_schema";
 import { WebSocket, WebSocketServer } from "ws";
 import { DB_CLIENT, server } from "..";
 import { Auth } from "../api/components/auth";
-import { API } from "core";
+import { API, APIError } from "core";
 import { ArrayMultimap } from "@teppeis/multimaps";
 import dayjs from "dayjs";
 
@@ -12,9 +12,14 @@ type ChatConnection = {
     socket: WebSocket;
 }
 
-const ChatSendRequest = z.object({
+const ChatRequest = z.object({
     targetId: APISchema.uuid,
 });
+
+class ChatError {
+    /** 사용자가 자기 자신에게 메세지를 보내려 했을 때. */
+    static CANNOT_SELF = new APIError("CANNOT_SELF", 400);
+}
 
 // 같은 포트에 WebSocket 서버 초기화.
 const wss = new WebSocketServer({server, path: "/chat"});
@@ -23,8 +28,13 @@ const wss = new WebSocketServer({server, path: "/chat"});
 const connections = new ArrayMultimap<string, ChatConnection>();
 
 wss.on("connection", Auth.delegateWS((ws, request, userId) => {
-    const given = API.tryParseURL(ChatSendRequest, API.urlOf(request));
+    const given = API.tryParseURL(ChatRequest, API.urlOf(request));
     const targetId = given.targetId;
+
+    // 사용자가 자기 자신에게 메세지를 보내려 했을 경우.
+    if (userId == targetId) {
+        throw ChatError.CANNOT_SELF;
+    }
 
     // 상대방을 수신하고 있다고 정의.
     connections.put(targetId, {userId, socket: ws});
