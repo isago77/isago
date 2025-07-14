@@ -3,6 +3,12 @@ import { API, APIError, HTTPHandler } from "core";
 import { Auth } from "./components/auth";
 import { DB_CLIENT } from "..";
 import { APISchema } from "./components/api_schema";
+import { SEARCH_MAX_COUNT, SQLSearcher } from "../sql/sql_searcher";
+
+const ChatActiveGetRequest = z.object({
+    page: APISchema.Search.page,
+    sort: APISchema.Search.sort,
+});
 
 const ChatActiveDelRequest = z.object({
     targetId: APISchema.uuid,
@@ -10,10 +16,28 @@ const ChatActiveDelRequest = z.object({
 
 // chat/active
 export const CHAT_ACTIVE_HANDLER = new HTTPHandler({
-    get: Auth.delegate(async (_1, response, _2, userId) => {
+    get: Auth.delegate(async (request, response, _, userId) => {
+        const given = API.tryParseURL(ChatActiveGetRequest, API.urlOf(request));
+
+        const searcher = new SQLSearcher();
+        searcher.add(userId, "userId = ?");
+
+        const offset = given.page * SEARCH_MAX_COUNT;
+        const orderBy = given.sort == "newest"
+            ? `b.createdAt DESC`
+            : `b.createdAt ASC`;
+
         const result = await DB_CLIENT.query(
-            "SELECT otherId, latestChatId FROM ActiveChat WHERE userId = ?",
-            [userId]
+            `
+                SELECT a.otherId, a.latestChatId FROM ActiveChat a
+                JOIN Chat b ON b.id = a.latestChatId
+                ${searcher.isEmpty ? "" : "WHERE"}
+                ${searcher.wheres}
+                ORDER BY ${orderBy}
+                LIMIT ${SEARCH_MAX_COUNT}
+                OFFSET ${offset}
+            `,
+            searcher.values
         );
 
         API.success(response, result);
