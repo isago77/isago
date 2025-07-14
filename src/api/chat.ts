@@ -24,7 +24,7 @@ export const CHAT_HANDLER = new HTTPHandler({
             );
 
             // 유효하지 않은 UUID인 경우.
-            if (!row) APIError.INVALID_UUID;
+            if (!row) throw APIError.INVALID_UUID;
 
             startAt = row.createdAt;
         }

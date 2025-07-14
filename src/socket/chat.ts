@@ -39,8 +39,32 @@ wss.on("connection", Auth.delegateWS((ws, request, userId) => {
     // 상대방을 수신하고 있다고 정의.
     connections.put(targetId, {userId, socket: ws});
 
+    // 사용자와 상대방 간의 최신 채팅 정보를 저장하거나 갱신합니다.
+    async function activeChatBy(
+        chatId: string,
+        userId: string,
+        otherId: string
+    ) {
+        const [chat] = await DB_CLIENT.query(
+            "SELECT * FROM ActiveChat WHERE userId = ? AND otherId = ? LIMIT 1",
+            [userId, otherId]
+        );
+
+        if (chat) {
+            await DB_CLIENT.query(
+                "UPDATE ActiveChat SET latestChatId = ? WHERE userId = ? AND otherId = ?",
+                [chatId, userId, otherId]
+            );
+        } else {
+            await DB_CLIENT.query(
+                "INSERT INTO ActiveChat(userId, otherId, latestChatId) VALUES(?, ?, ?)",
+                [userId, otherId, chatId]
+            );
+        }
+    }
+
     // 연결된 사용자가 메세지를 보냈을 경우.
-    ws.on("message", (data) => {
+    ws.on("message", async (data) => {
         const recipients = connections.get(userId);
         const target = recipients.find(e => e.userId == targetId);
         const uuid = API.createUUID()
@@ -52,10 +76,14 @@ wss.on("connection", Auth.delegateWS((ws, request, userId) => {
             target.socket.send(JSON.stringify({uuid, message, sendedAt}));
         }
 
-        DB_CLIENT.query(
+        // 해당 메세지를 영구적으로 저장.
+        await DB_CLIENT.query(
             "INSERT INTO Chat(id, senderId, targetId, message, createdAt) VALUES(?, ?, ?, ?, ?)",
             [uuid, userId, targetId, message, sendedAt]
         ).catch(() => null);
+
+        activeChatBy(uuid, userId, targetId);
+        activeChatBy(uuid, targetId, userId);
     });
 
     // 연결이 끊어질 시, 매핑되어 있던 인스턴스도 같이 폐기.

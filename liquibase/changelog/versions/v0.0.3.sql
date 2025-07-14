@@ -15,3 +15,14 @@ CREATE TABLE `Chat`(
     INDEX (`targetId`),
     INDEX (`createdAt`)
 );
+
+--changeset ttangkong:2
+CREATE TABLE `ActiveChat`(
+    `userId` CHAR(36) NOT NULL,
+    `otherId` CHAR(36) NOT NULL,
+    `latestChatId` CHAR(36) NOT NULL,
+    PRIMARY KEY(`userId`, `otherId`),
+    FOREIGN KEY(`userId`) REFERENCES `User`(`id`),
+    FOREIGN KEY(`otherId`) REFERENCES `User`(`id`),
+    FOREIGN KEY(`latestChatId`) REFERENCES `Chat`(`id`)
+);
