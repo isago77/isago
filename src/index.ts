@@ -39,6 +39,7 @@ import { STAGE_MOVER_DONE_HANDLER } from "./api/stage/stage-mover-done";
 import { STAGE_MOVER_SELF_HANDLER } from "./api/stage/stage-mover-self";
 import { CHAT_HANDLER } from "./api/chat";
 import { CHAT_ACTIVE_HANDLER } from "./api/chat-active";
+import { CHAT_MESSAGE_HANDLER } from "./api/chat-message";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -124,6 +125,7 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
     new HTTPRouter("chat", CHAT_HANDLER, [
         new HTTPRouter("active", CHAT_ACTIVE_HANDLER),
+        new HTTPRouter("message", CHAT_MESSAGE_HANDLER),
     ]),
 ]);
 
