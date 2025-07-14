@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { API, APIError, HTTPHandler } from "core";
 import { APISchema } from "./components/api_schema";
-import { REDIS_CLIENT } from "..";
+import { DB_CLIENT, REDIS_CLIENT } from "..";
 
 const SignOutRequest = z.object({
+    deviceId: z.string().max(64).optional(),
     accessToken: APISchema.token.optional(),
     refreshToken: APISchema.token.optional()
 });
@@ -36,6 +37,11 @@ export const SIGN_OUT_HANDLER = new HTTPHandler({
             if (count == 0) {
                 error = SignOutError.INVALID_REFRESH_TOKEN;
             }
+        }
+
+        if (given.deviceId) {
+            // 해당 디바이스 관련 FCM 토큰을 만료시킵니다.
+            await DB_CLIENT.query("DELETE FROM FCMToken WHERE deviceId = ?", [given.deviceId]);
         }
 
         if (error) throw error;

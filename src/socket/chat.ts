@@ -6,6 +6,8 @@ import { DB_CLIENT, server } from "..";
 import { Auth } from "../api/components/auth";
 import { API, APIError } from "core";
 import { ArrayMultimap } from "@teppeis/multimaps";
+import { Firebase } from "../api/components/firebase";
+import { User } from "../api/components/user";
 
 export type ChatConnection = {
     userId: string;
@@ -14,6 +16,12 @@ export type ChatConnection = {
 
 const ChatRequest = z.object({
     targetId: APISchema.uuid,
+});
+
+// 클라이언트 측에서 전송하는 메세지 형태.
+const ChatMessageRequest = z.object({
+    type: z.enum(["text", "image"]),
+    body: z.string(),
 });
 
 class ChatError {
@@ -92,6 +100,22 @@ setImmediate(() => {
             // 메세지를 보낸 사용자를 수신하는 사용자가 있을 경우.
             if (target) {
                 target.socket.send(response);
+            } {
+                const given = API.tryParseJSON(ChatMessageRequest, message);
+
+                // 알림 형태로 메세지 전송.
+                (async () => {
+                    const displayName = await User.displayNameOf(userId);
+
+                    await Firebase.sendFCM({
+                        userId: targetId,
+                        details: {body: response},
+                        notification: {
+                            title: `${displayName}님이 당신에게 메세지를 보냈습니다.`,
+                            body: given.body,
+                        }
+                    });
+                })();
             }
 
             // 보낸 이에게도 주어진 메시지 정보를 전송할 필요가 있음.

@@ -22,6 +22,7 @@ export class UserError {
 }
 
 export class User {
+    /** 주어진 사용자 아이디를 기반으로 역할 유형을 조회하고 이를 반환합니다. */
     static async roleOf(userId: string): Promise<UserRole | null> {
         const [row] = await DB_CLIENT.query(
             "SELECT role FROM User WHERE id = ? LIMIT 1",
@@ -30,5 +31,16 @@ export class User {
 
         if (!row) throw new Error("사용자의 역할을 조회하는데 실패하였습니다.");
         return row.role;
+    }
+
+    /** 주어진 사용자 아이디를 기반으로 표시 이름을 조회하고 이를 반환합니다. */
+    static async displayNameOf(userId: string): Promise<UserRole | null> {
+        const [row] = await DB_CLIENT.query(
+            "SELECT displayName FROM User WHERE id = ? LIMIT 1",
+            [userId]
+        );
+
+        if (!row) throw new Error("사용자의 표시 이름을 조회하는데 실패하였습니다.");
+        return row.displayName;
     }
 }

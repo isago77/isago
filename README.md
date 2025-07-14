@@ -41,6 +41,11 @@ TOSS_SECRET_KEY=...
 requirepass ...{0}
 ```
 
+## Firebase
+기존 Firebase 서비스 계정이 변경되었거나 새로운 계정을 사용하는 경우, 기존의 `firebase-service-account.json` 파일을 삭제한 뒤 새로운 비공개 키를 생성하여 다시 설정해야 합니다.
+
+![firebase-console](https://github.com/user-attachments/assets/1b0e85d5-f55e-435b-aacc-d5638324208b)
+
 # 시작하기
 터미널에서 다음 명령을 차례로 입력합니다.
 

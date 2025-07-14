@@ -13,7 +13,7 @@ const ChatRequest = z.object({
 });
 
 export const CHAT_HANDLER = new HTTPHandler({
-    get: Auth.delegate(async (request, response, body, userId) => {
+    get: Auth.delegate(async (request, response, _, userId) => {
         const given = API.tryParseURL(ChatRequest, API.urlOf(request));
         let startAt;
 

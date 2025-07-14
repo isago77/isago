@@ -1,3 +1,6 @@
+// 웹소켓 관련 코드 초기화.
+import "./socket/chat";
+
 import http from "http";
 import { config } from "dotenv";
 import { createPool } from "mariadb";
@@ -41,9 +44,7 @@ import { CHAT_HANDLER } from "./api/chat";
 import { CHAT_ACTIVE_HANDLER } from "./api/chat-active";
 import { CHAT_MESSAGE_HANDLER } from "./api/chat-message";
 import { CHAT_READ_HANDLER } from "./api/chat-read";
-
-// 웹소켓 관련 코드 초기화.
-import "./socket/chat";
+import { FIREBASE_TOKEN_HANDLER } from "./api/firebase-token";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -132,6 +133,9 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
         new HTTPRouter("active", CHAT_ACTIVE_HANDLER),
         new HTTPRouter("message", CHAT_MESSAGE_HANDLER),
     ]),
+    new HTTPRouter("firebase", undefined, [
+        new HTTPRouter("token", FIREBASE_TOKEN_HANDLER)
+    ])
 ]);
 
 export const server = http.createServer(async (request, response) => {
