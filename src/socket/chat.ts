@@ -70,16 +70,22 @@ wss.on("connection", Auth.delegateWS((ws, request, userId) => {
         const uuid = API.createUUID()
         const message = data.toString();
         const sendedAt = dayjs().format("YYYY-MM-DD HH:mm:ss");
+        let isRead = target ? true : false;
+
+        const response = JSON.stringify({uuid, message, sendedAt, isRead});
 
         // 메세지를 보낸 사용자를 수신하는 사용자가 있을 경우.
         if (target) {
-            target.socket.send(JSON.stringify({uuid, message, sendedAt}));
+            target.socket.send(response);
         }
+
+        // 보낸 이에게도 해당 메시지 정보를 전송할 필요가 있음.
+        ws.send(response);
 
         // 해당 메세지를 영구적으로 저장.
         await DB_CLIENT.query(
-            "INSERT INTO Chat(id, senderId, targetId, message, createdAt) VALUES(?, ?, ?, ?, ?)",
-            [uuid, userId, targetId, message, sendedAt]
+            "INSERT INTO Chat(id, senderId, targetId, message, createdAt, isRead) VALUES(?, ?, ?, ?, ?, ?)",
+            [uuid, userId, targetId, message, sendedAt, isRead]
         ).catch(() => null);
 
         activeChatBy(uuid, userId, targetId);
