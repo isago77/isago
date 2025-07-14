@@ -42,6 +42,9 @@ import { CHAT_ACTIVE_HANDLER } from "./api/chat-active";
 import { CHAT_MESSAGE_HANDLER } from "./api/chat-message";
 import { CHAT_READ_HANDLER } from "./api/chat-read";
 
+// 웹소켓 관련 코드 초기화.
+import "./socket/chat";
+
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
 
@@ -148,6 +151,3 @@ export const server = http.createServer(async (request, response) => {
 server.listen(8080, undefined, undefined, () => {
     REDIS_CLIENT.connect();
 });
-
-// 웹소켓 관련 코드 초기화.
-import "./socket/chat";
