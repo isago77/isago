@@ -30,6 +30,8 @@ export const STAGE_MOVER_SELF_HANDLER = new HTTPHandler({
             "a.status",
             "a.canceller",
             "a.createdAt",
+            "b.moverId",
+            "b.proposedPrice"
         ];
 
         const searcher = new SQLSearcher();

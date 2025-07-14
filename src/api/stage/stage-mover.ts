@@ -73,19 +73,25 @@ export const STAGE_MOVER_HANDLER = new HTTPHandler({
         const given = API.tryParseURL(StageMoverGetRequest, API.urlOf(request));
 
         const fields = [
-            "id",
-            "stageId",
-            "requestId",
-            "visitDate",
-            "visitTime",
-            "location",
-            "status",
-            "canceller",
-            "createdAt",
+            "a.id",
+            "a.stageId",
+            "a.requestId",
+            "a.visitDate",
+            "a.visitTime",
+            "a.location",
+            "a.status",
+            "a.canceller",
+            "a.createdAt",
+            "b.moverId",
+            "b.proposedPrice"
         ];
 
         const [row] = await DB_CLIENT.query(
-            `SELECT ${fields.join(", ")} FROM MoverStage WHERE stageId = ?`,
+            `
+                SELECT ${fields.join(", ")} FROM MoverStage a
+                JOIN MoverRequest b ON b.id = a.requestId
+                WHERE a.stageId = ?
+            `,
             [given.stageId]
         );
 
