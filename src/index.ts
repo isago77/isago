@@ -47,6 +47,7 @@ import { CHAT_READ_HANDLER } from "./api/chat-read";
 import { FIREBASE_TOKEN_HANDLER } from "./api/firebase-token";
 import { STAGE_MOVER_REVIEW_HANDLER } from "./api/stage/stage-mover-review";
 import { STAGE_MOVER_REVIEW_SEARCH_HANDLER } from "./api/stage/stage-mover-review-search";
+import { STAGE_MOVER_REVIEW_SELF_HANDLER } from "./api/stage/stage-mover-review-self";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -130,7 +131,8 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
             new HTTPRouter("done", STAGE_MOVER_DONE_HANDLER),
             new HTTPRouter("self", STAGE_MOVER_SELF_HANDLER),
             new HTTPRouter("review", STAGE_MOVER_REVIEW_HANDLER, [
-                new HTTPRouter("search", STAGE_MOVER_REVIEW_SEARCH_HANDLER)
+                new HTTPRouter("search", STAGE_MOVER_REVIEW_SEARCH_HANDLER),
+                new HTTPRouter("self", STAGE_MOVER_REVIEW_SELF_HANDLER),
             ]),
         ]),
     ]),
