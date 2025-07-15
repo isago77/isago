@@ -23,7 +23,8 @@ const ProfileSelfPatchRequest = z.object({
     links: z.array(Link).optional(),
     address: APISchema.address.optional(),
     contactAs: APISchema.phoneNumber.optional(),
-    serviceAreas: z.array(z.string()).optional()
+    serviceAreas: z.array(z.string()).optional(),
+    accountNumber: z.string().max(32).optional(),
 });
 
 // profile/self
@@ -58,6 +59,7 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
                 `address`,
                 `contactAs`,
                 `serviceAreas`,
+                `accountNumber`,
             ];
 
             const [row] = await DB_CLIENT.query(
@@ -107,6 +109,7 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
                 modifier.addIfDefined(given, "links");
                 modifier.addIfDefined(given, "address")
                 modifier.addIfDefined(given, "serviceAreas");
+                modifier.addIfDefined(given, "accountNumber");
 
                 // 검증된 사용자(e.g. 업체, 견적 방문자, 관리자)이기 때문에 별도의 인증은 필요 없음.
                 if (given.contactAs) {
