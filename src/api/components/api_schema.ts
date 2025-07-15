@@ -68,7 +68,7 @@ export namespace APISchema {
     }
 
     export namespace Search {
-        export const cursor = z.coerce.number().optional();
+        export const cursor = z.coerce.number().int().optional();
         export const sort = z.enum(["oldest", "newest"]).default("newest");
     }
 }

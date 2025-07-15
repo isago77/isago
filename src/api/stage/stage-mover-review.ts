@@ -7,7 +7,7 @@ import { StageMoverStatus } from "./components/stage_mover_status";
 
 const StageMoverReviewPostRequest = z.object({
     stageId: APISchema.uuid,
-    rating: z.number().min(0).max(5),
+    rating: z.number().int().min(0).max(5),
     comment: z.string(),
 });
 
