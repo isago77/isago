@@ -6,7 +6,7 @@ import { APISchema } from "./components/api_schema";
 import { SEARCH_MAX_COUNT, SQLSearcher } from "../sql/sql_searcher";
 
 const ChatActiveGetRequest = z.object({
-    page: APISchema.Search.page,
+    cursor: APISchema.Search.cursor,
     sort: APISchema.Search.sort,
 });
 
@@ -22,22 +22,13 @@ export const CHAT_ACTIVE_HANDLER = new HTTPHandler({
         const searcher = new SQLSearcher();
         searcher.add(userId, "userId = ?");
 
-        const offset = given.page * SEARCH_MAX_COUNT;
-        const orderBy = given.sort == "newest"
-            ? `b.createdAt DESC`
-            : `b.createdAt ASC`;
-
-        const result = await DB_CLIENT.query(
-            `
-                SELECT a.otherId, a.latestChatId FROM ActiveChat a
-                JOIN Chat b ON b.id = a.latestChatId
-                ${searcher.isEmpty ? "" : "WHERE"}
-                ${searcher.wheres}
-                ORDER BY ${orderBy}
-                LIMIT ${SEARCH_MAX_COUNT}
-                OFFSET ${offset}
-            `,
-            searcher.values
+        const result = await searcher.search(
+            "ActiveChat",
+            given.sort,
+            given.cursor,
+            "b.cursor",
+            "JOIN Chat b ON b.id = a.latestChatId",
+            "a.otherId, a.latestChatId, b.cursor"
         );
 
         API.success(response, result);

@@ -9,6 +9,7 @@ CREATE TABLE `Chat`(
     `isRead` BOOLEAN DEFAULT FALSE,
     `updatedAt` DATETIME,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY(`senderId`) REFERENCES `User`(`id`),
     FOREIGN KEY(`targetId`) REFERENCES `User`(`id`),
     INDEX (`senderId`),

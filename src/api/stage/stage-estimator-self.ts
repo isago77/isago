@@ -1,12 +1,11 @@
 import z from "zod";
 import { API, HTTPHandler } from "core";
 import { Auth } from "../components/auth";
-import { DB_CLIENT } from "../..";
-import { SEARCH_MAX_COUNT, SQLSearcher } from "../../sql/sql_searcher";
+import { SQLSearcher } from "../../sql/sql_searcher";
 import { APISchema } from "../components/api_schema";
 
 export const StageEstimatorSelfRequest = z.object({
-    page: APISchema.Search.page,
+    cursor: APISchema.Search.cursor,
     sort: APISchema.Search.sort,
     status: z.enum([
         "waiting",
@@ -27,27 +26,20 @@ export const STAGE_ESTIMATOR_SELF_HANDLER = new HTTPHandler({
             "b.toAddress",
             "b.status AS stageStatus",
             "b.preferredDate",
-            "b.createdAt",
             "b.endedAt"
         ];
 
         const searcher = new SQLSearcher();
+        searcher.add(userId, "estimatorId = ?");
         searcher.addIfDefined(given, "status", "a.status = ?");
 
-        const offset = given.page * SEARCH_MAX_COUNT;
-        const orderBy = given.sort == "newest"
-            ? "a.visitDate DESC"
-            : "a.visitDate ASC";
-
-        const result = await DB_CLIENT.query(
-            `
-                SELECT ${fields.join(", ")} FROM EstimatorStage a JOIN Stage b ON a.stageId = b.id
-                WHERE estimatorId = ? ${searcher.isEmpty ? searcher.wheres : `AND ${searcher.wheres}`}
-                ORDER BY ${orderBy}
-                LIMIT ${SEARCH_MAX_COUNT}
-                OFFSET ${offset}
-            `,
-            [userId, ...searcher.values]
+        const result = await searcher.search(
+            "EstimatorStage",
+            given.sort,
+            given.cursor,
+            undefined,
+            "JOIN Stage b ON a.stageId = b.id",
+            fields.join(", ")
         );
 
         API.success(response, result);

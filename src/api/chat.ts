@@ -1,45 +1,38 @@
 import z from "zod";
-import { API, APIError, HTTPHandler } from "core";
+import { API, HTTPHandler } from "core";
 import { Auth } from "./components/auth";
 import { APISchema } from "./components/api_schema";
 import { DB_CLIENT } from "..";
+import { SQLSearcher } from "../sql/sql_searcher";
 
 /** 클라이언트 측에서 한 번에 조회할 수 있는 메세지들의 개수. */
 const CHAT_SEARCH_MAX_COUNT = 30;
 
 const ChatRequest = z.object({
     targetId: APISchema.uuid,
-    offsetId: APISchema.uuid.optional(),
+    cursor: APISchema.Search.cursor,
 });
 
 export const CHAT_HANDLER = new HTTPHandler({
     get: Auth.delegate(async (request, response, _, userId) => {
         const given = API.tryParseURL(ChatRequest, API.urlOf(request));
-        let startAt;
 
-        if (given.offsetId) {
-            const [row] = await DB_CLIENT.query(
-                "SELECT createdAt FROM Chat WHERE id = ?",
-                [given.offsetId]
-            );
-
-            // 유효하지 않은 UUID인 경우.
-            if (!row) throw APIError.INVALID_UUID;
-
-            startAt = row.createdAt;
-        }
-
-        const result = await DB_CLIENT.query(
+        const limitCount = CHAT_SEARCH_MAX_COUNT + 1;
+        const rows: any[] = await DB_CLIENT.query(
             `
                 SELECT * FROM Chat 
                 WHERE ((senderId = ? AND targetId = ?)
                     OR (senderId = ? AND targetId = ?))
-                ${startAt != null ? "AND createdAt < ?" : ""}
-                ORDER BY createdAt DESC
-                LIMIT ${CHAT_SEARCH_MAX_COUNT}
+                ${given.cursor != null ? "AND \`cursor\` < ?" : ""}
+                ORDER BY \`cursor\` DESC
+                LIMIT ${limitCount}
             `,
-            [userId, given.targetId, given.targetId, userId, startAt].filter(Boolean)
+            [userId, given.targetId, given.targetId, userId, given.cursor].filter(Boolean)
         );
+
+        console.log(rows);
+
+        const result = SQLSearcher.createResult(rows, "cursor", CHAT_SEARCH_MAX_COUNT);
 
         API.success(response, result);
     })

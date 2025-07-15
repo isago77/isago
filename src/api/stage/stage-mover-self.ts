@@ -6,7 +6,7 @@ import { SEARCH_MAX_COUNT, SQLSearcher } from "../../sql/sql_searcher";
 import { APISchema } from "../components/api_schema";
 
 export const StageMoverSelfRequest = z.object({
-    page: APISchema.Search.page,
+    cursor: APISchema.Search.cursor,
     sort: APISchema.Search.sort,
     status: z.enum([
         "waiting",
@@ -30,28 +30,22 @@ export const STAGE_MOVER_SELF_HANDLER = new HTTPHandler({
             "a.status",
             "a.canceller",
             "a.createdAt",
+            "a.cursor",
             "b.moverId",
             "b.proposedPrice"
         ];
 
         const searcher = new SQLSearcher();
+        searcher.add(userId, "b.moverId = ?");
         searcher.addIfDefined(given, "status", "a.status = ?");
 
-        const offset = given.page * SEARCH_MAX_COUNT;
-        const orderBy = given.sort == "newest"
-            ? "a.visitDate DESC"
-            : "a.visitDate ASC";
-
-        const result = await DB_CLIENT.query(
-            `
-                SELECT ${fields.join(", ")} FROM MoverStage a
-                JOIN MoverRequest b ON b.stageId = a.stageId
-                WHERE b.moverId = ? ${searcher.isEmpty ? searcher.wheres : `AND ${searcher.wheres}`}
-                ORDER BY ${orderBy}
-                LIMIT ${SEARCH_MAX_COUNT}
-                OFFSET ${offset}
-            `,
-            [userId, ...searcher.values]
+        const result = await searcher.search(
+            "MoverStage",
+            given.sort,
+            given.cursor,
+            undefined,
+            "JOIN MoverRequest b ON b.stageId = a.stageId",
+            fields.join(", "),
         );
 
         API.success(response, result);

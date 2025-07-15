@@ -57,6 +57,7 @@ export const DB_CLIENT = createPool({
     database: process.env.MARIADB_DATABASE,
     connectionLimit: parseInt(process.env.MARIADB_POOL_LIMIT!),
     dateStrings: true,
+    bigIntAsNumber: true,
     typeCast: (field, next) => {
         // TINYINT(1)은 사실상 Boolean 이므로 이를 변환.
         if (field.type == "TINY" && field.columnLength == 1) {

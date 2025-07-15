@@ -7,7 +7,7 @@ import { DB_CLIENT } from "../..";
 import { APISchema } from "../components/api_schema";
 
 const StageSearchRequest = z.object({
-    page: APISchema.Search.page,
+    cursor: APISchema.Search.cursor,
     sort: APISchema.Search.sort,
     status: z.enum([
         "waitingEstimator",
@@ -20,6 +20,7 @@ const StageSearchRequest = z.object({
     ]).optional()
 });
 
+// stage/search
 export const STAGE_SEARCH_HANDLER = new HTTPHandler({
     get: Auth.delegate(async (request, response, _, userId) => {
         const given = API.tryParseURL(StageSearchRequest, API.urlOf(request));
@@ -31,16 +32,16 @@ export const STAGE_SEARCH_HANDLER = new HTTPHandler({
         const searcher = new SQLSearcher();
         searcher.addIfDefined(given, "status", "status = ?");
 
-        let result: any[] = await searcher.search(
+        const result = await searcher.search(
             "Stage",
-            given.page,
-            given.sort as SearchSort
+            given.sort,
+            given.cursor,
         );
 
         // 이사 업체의 경우, 해당 이사 절차에 이미 견적을 제안했는지에 대한 여부를 추가적으로 정의해야 함.
         if (role == UserRole.mover
          || role == UserRole.admin) {
-            const stageIds = result.map(stage => stage.id);
+            const stageIds = result.body.map(stage => stage.id);
 
             if (stageIds.length > 0) {
                 const rows = await DB_CLIENT.query(
@@ -53,7 +54,7 @@ export const STAGE_SEARCH_HANDLER = new HTTPHandler({
                     rows.map((row: any) => [row.stageId, row.id])
                 );
 
-                result = result.map(stage => ({
+                result.body = result.body.map(stage => ({
                     ...stage,
                     requestId: requestMap.get(stage.id) ?? null
                 }));

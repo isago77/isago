@@ -18,6 +18,7 @@ CREATE TABLE `Stage`(
     `preferredDate` DATETIME,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `endedAt` DATETIME,
+    `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY(`userId`) REFERENCES `User`(`id`)
 );
 
@@ -36,6 +37,8 @@ CREATE TABLE `EstimatorStage`(
         'completed',    -- 견적 완료
         'cancelled'     -- 견적 취소
     ) NOT NULL,
+    `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
     FOREIGN KEY(`estimatorId`) REFERENCES `User`(`id`)
 );
@@ -48,6 +51,7 @@ CREATE TABLE `MoverRequest`(
     `proposedPrice` INT NOT NULL,
     `note` TEXT,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
     FOREIGN KEY(`moverId`) REFERENCES `User`(`id`)
 );
@@ -70,6 +74,7 @@ CREATE TABLE `MoverStage`(
     `paymentKey` VARCHAR(200) NOT NULL,
     `canceller` CHAR(36),
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
     FOREIGN KEY(`requestId`) REFERENCES `MoverRequest`(`id`)
 );
@@ -82,6 +87,7 @@ CREATE TABLE `MoverReview`(
     `rating` TINYINT NOT NULL,
     `comment` VARCHAR(1024),
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     UNIQUE(`writerId`, `moverStageId`),
     FOREIGN KEY(`writerId`) REFERENCES `User`(`id`),
     FOREIGN KEY(`moverStageId`) REFERENCES `MoverStage`(`id`)

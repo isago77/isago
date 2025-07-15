@@ -10,7 +10,9 @@ CREATE TABLE `User`(
     `passwordSalt` CHAR(64), -- SHA-256
     `marketingAccepted` BOOLEAN NOT NULL,
     `profileUrl` VARCHAR(512),
-    `role` ENUM("estimator", "mover", "admin")
+    `role` ENUM("estimator", "mover", "admin"),
+    `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `cursor` BIGINT UNIQUE AUTO_INCREMENT
 );
 
 --changeset ttangkong:2

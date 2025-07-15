@@ -16,8 +16,8 @@ const StageMoverRequestPostRequest = z.object({
 
 const StageMoverRequestGetRequest = z.object({
     stageId: APISchema.uuid,
-    page: APISchema.Search.page,
     sort: APISchema.Search.sort,
+    cursor: APISchema.Search.cursor,
 });
 
 export class StageMoverRequestError {
@@ -79,8 +79,8 @@ export const STAGE_MOVER_REQUEST_HANDLER = new HTTPHandler({
 
         const result = await searcher.search(
             "MoverRequest",
-            given.page,
             given.sort,
+            given.cursor,
         );
 
         API.success(response, result);
