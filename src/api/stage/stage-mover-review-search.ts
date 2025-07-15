@@ -7,6 +7,7 @@ const GetRequest = z.object({
     moverId: APISchema.uuid.optional(),
     sort: APISchema.Search.sort,
     cursor: APISchema.Search.cursor,
+    rating: z.coerce.number().int().min(0).max(5).optional(),
 });
 
 // stage/mover/review/search
@@ -16,6 +17,7 @@ export const STAGE_MOVER_REVIEW_SEARCH_HANDLER = new HTTPHandler({
 
         const searcher = new SQLSearcher();
         searcher.addIfDefined(given, "moverId", "c.moverId = ?");
+        searcher.addIfDefined(given, "rating", "a.rating = ?");
 
         const result = await searcher.search(
             "MoverReview",

@@ -7,6 +7,7 @@ import { Auth } from "../components/auth";
 const GetRequest = z.object({
     sort: APISchema.Search.sort,
     cursor: APISchema.Search.cursor,
+    rating: z.coerce.number().int().min(0).max(5).optional(),
 });
 
 // stage/mover/review/self
@@ -16,6 +17,7 @@ export const STAGE_MOVER_REVIEW_SELF_HANDLER = new HTTPHandler({
 
         const searcher = new SQLSearcher();
         searcher.add(userId, "a.writerId = ?");
+        searcher.addIfDefined(given, "rating", "a.rating = ?");
 
         const result = await searcher.search(
             "MoverReview",
