@@ -5,7 +5,7 @@ import { User, UserError, UserRole } from "./components/user";
 
 // image/estimator
 export const IMAGE_ESTIMATOR_HANDLER = new HTTPHandler({
-    post: Auth.delegate(async (_1, response, body, userId) => {
+    post: Auth.delegate(async (_, response, body, userId) => {
         const role = await User.roleOf(userId);
     
         // 사용자가 견적 방문자 또는 관리자가 아닌 경우.

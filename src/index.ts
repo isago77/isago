@@ -49,6 +49,8 @@ import { STAGE_MOVER_REVIEW_HANDLER } from "./api/stage/stage-mover-review";
 import { STAGE_MOVER_REVIEW_SEARCH_HANDLER } from "./api/stage/stage-mover-review-search";
 import { STAGE_MOVER_REVIEW_SELF_HANDLER } from "./api/stage/stage-mover-review-self";
 import { STAGE_MOVER_REVIEW_STATS_HANDLER } from "./api/stage/stage-mover-review-stats";
+import { IMAGE_REVIEW_HANDLER } from "./api/image-review";
+import { IMAGE_CHAT_HANDLER } from "./api/image-chat";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -106,7 +108,9 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("image", PROFILE_HANDLER, [
         new HTTPRouter("profile", IMAGE_PROFILE_HANDLER),
         new HTTPRouter("estimator", IMAGE_ESTIMATOR_HANDLER),
-        new HTTPRouter("banner", IMAGE_BANNER_HANDLER)
+        new HTTPRouter("banner", IMAGE_BANNER_HANDLER),
+        new HTTPRouter("review", IMAGE_REVIEW_HANDLER),
+        new HTTPRouter("chat", IMAGE_CHAT_HANDLER),
     ]),
     new HTTPRouter("issue", undefined, [
         new HTTPRouter("role-serial", ISSUE_ROLE_SERIAL_HANDLER)

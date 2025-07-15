@@ -5,8 +5,6 @@ import { DB_CLIENT } from "../..";
 
 const GetRequest = z.object({
     moverId: APISchema.uuid,
-    sort: APISchema.Search.sort,
-    cursor: APISchema.Search.cursor,
 });
 
 // stage/mover/review/stats
