@@ -27,8 +27,8 @@ export const STAGE_MOVER_DONE_HANDLER = new HTTPHandler({
 
         const [row] = await DB_CLIENT.query(
             `
-                SELECT a.stageId, b.moverId, a.status FROM MoverStage a JOIN MoverRequest b
-                ON a.stageId = b.stageId WHERE a.id = ?
+                SELECT a.*, b.moverId, b.proposedPrice FROM MoverStage a
+                JOIN MoverRequest b ON a.stageId = b.stageId WHERE a.id = ?
             `,
             [given.uuid]
         );
@@ -47,6 +47,10 @@ export const STAGE_MOVER_DONE_HANDLER = new HTTPHandler({
         }
 
         const stageId = row.stageId;
+        const moverId = row.moverId;
+
+        // 이사 업체에 대한 최종 정산금.
+        const amount = row.proposedPrice;
 
         await SQLTransaction.perform(async (db) => {
             await db.query(
@@ -57,6 +61,11 @@ export const STAGE_MOVER_DONE_HANDLER = new HTTPHandler({
             await db.query(
                 "UPDATE MoverStage SET status = ? WHERE id = ?",
                 [StageMoverStatus.completed, given.uuid]
+            );
+
+            await db.query(
+                "INSERT INTO Settlement(id, userId, amount) VALUES(?, ?, ?)",
+                [API.createUUID(), moverId, amount]
             );
         });
 
