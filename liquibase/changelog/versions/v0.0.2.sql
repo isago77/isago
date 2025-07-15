@@ -76,21 +76,22 @@ CREATE TABLE `MoverStage`(
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
-    FOREIGN KEY(`requestId`) REFERENCES `MoverRequest`(`id`)
+    FOREIGN KEY(`requestId`) REFERENCES `Stage`(`id`)
 );
 
 --changeset ttangkong:5
 CREATE TABLE `MoverReview`(
     `id` CHAR(36) PRIMARY KEY,
     `writerId` CHAR(36) NOT NULL,
-    `moverStageId` CHAR(36) NOT NULL,
+    `stageId` CHAR(36) NOT NULL,
     `rating` TINYINT NOT NULL,
-    `comment` VARCHAR(1024),
+    `comment` JSON,
+    `updatedAt` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `cursor` BIGINT UNIQUE AUTO_INCREMENT,
-    UNIQUE(`writerId`, `moverStageId`),
+    UNIQUE(`writerId`, `stageId`),
     FOREIGN KEY(`writerId`) REFERENCES `User`(`id`),
-    FOREIGN KEY(`moverStageId`) REFERENCES `MoverStage`(`id`)
+    FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`)
 );
 
 --changeset ttangkong:6

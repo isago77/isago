@@ -30,8 +30,6 @@ export const CHAT_HANDLER = new HTTPHandler({
             [userId, given.targetId, given.targetId, userId, given.cursor].filter(Boolean)
         );
 
-        console.log(rows);
-
         const result = SQLSearcher.createResult(rows, "cursor", CHAT_SEARCH_MAX_COUNT);
 
         API.success(response, result);
