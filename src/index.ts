@@ -52,6 +52,7 @@ import { STAGE_MOVER_REVIEW_STATS_HANDLER } from "./api/stage/stage-mover-review
 import { IMAGE_REVIEW_HANDLER } from "./api/image-review";
 import { IMAGE_CHAT_HANDLER } from "./api/image-chat";
 import { SETTLEMENTS_STATS_HANDLER } from "./api/settlements-stats";
+import { SETTLEMENTS_HANDLER } from "./api/settlements";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -152,7 +153,7 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("firebase", undefined, [
         new HTTPRouter("token", FIREBASE_TOKEN_HANDLER)
     ]),
-    new HTTPRouter("settlements", undefined, [
+    new HTTPRouter("settlements", SETTLEMENTS_HANDLER, [
         new HTTPRouter("stats", SETTLEMENTS_STATS_HANDLER)
     ]),
 ]);
