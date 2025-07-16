@@ -16,9 +16,9 @@ CREATE TABLE `Settlement`(
 CREATE TABLE `Notification`(
     `id` CHAR(36) PRIMARY KEY,
     `userId` CHAR(36) NOT NULL,
-    `type` VARCHAR(128) NOT NOT,
+    `type` VARCHAR(128) NOT NULL,
     `data` TEXT,
-    `body` JOIN NOT NOT,
+    `body` JSON NOT NULL,
     `isRead` BOOLEAN DEFAULT FALSE,
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `cursor` BIGINT UNIQUE AUTO_INCREMENT,
