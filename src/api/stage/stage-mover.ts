@@ -83,13 +83,15 @@ export const STAGE_MOVER_HANDLER = new HTTPHandler({
             "a.canceller",
             "a.createdAt",
             "b.moverId",
-            "b.proposedPrice"
+            "b.proposedPrice",
+            "c.userId",
         ];
 
         const [row] = await DB_CLIENT.query(
             `
                 SELECT ${fields.join(", ")} FROM MoverStage a
                 JOIN MoverRequest b ON b.id = a.requestId
+                JOIN Stage c ON c.id = b.stageId
                 WHERE a.stageId = ?
             `,
             [given.stageId]
