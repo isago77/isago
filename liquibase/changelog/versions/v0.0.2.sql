@@ -76,7 +76,7 @@ CREATE TABLE `MoverStage`(
     `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY(`stageId`) REFERENCES `Stage`(`id`),
-    FOREIGN KEY(`requestId`) REFERENCES `Stage`(`id`)
+    FOREIGN KEY(`requestId`) REFERENCES `MoverRequest`(`id`)
 );
 
 --changeset ttangkong:5
