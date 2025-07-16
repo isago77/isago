@@ -51,6 +51,7 @@ import { STAGE_MOVER_REVIEW_SELF_HANDLER } from "./api/stage/stage-mover-review-
 import { STAGE_MOVER_REVIEW_STATS_HANDLER } from "./api/stage/stage-mover-review-stats";
 import { IMAGE_REVIEW_HANDLER } from "./api/image-review";
 import { IMAGE_CHAT_HANDLER } from "./api/image-chat";
+import { SETTLEMENTS_STATS_HANDLER } from "./api/settlements-stats";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -64,6 +65,7 @@ export const DB_CLIENT = createPool({
     connectionLimit: parseInt(process.env.MARIADB_POOL_LIMIT!),
     dateStrings: true,
     bigIntAsNumber: true,
+    decimalAsNumber: true,
     typeCast: (field, next) => {
         // TINYINT(1)은 사실상 Boolean 이므로 이를 변환.
         if (field.type == "TINY" && field.columnLength == 1) {
@@ -149,7 +151,10 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
     new HTTPRouter("firebase", undefined, [
         new HTTPRouter("token", FIREBASE_TOKEN_HANDLER)
-    ])
+    ]),
+    new HTTPRouter("settlements", undefined, [
+        new HTTPRouter("stats", SETTLEMENTS_STATS_HANDLER)
+    ]),
 ]);
 
 export const server = http.createServer(async (request, response) => {
