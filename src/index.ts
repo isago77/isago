@@ -53,6 +53,9 @@ import { IMAGE_REVIEW_HANDLER } from "./api/image-review";
 import { IMAGE_CHAT_HANDLER } from "./api/image-chat";
 import { SETTLEMENTS_STATS_HANDLER } from "./api/settlements-stats";
 import { SETTLEMENTS_HANDLER } from "./api/settlements";
+import { NOTIFICATION_HANDLER } from "./api/notification";
+import { NOTIFICATION_READ_HANDLER } from "./api/notification-read";
+import { NOTIFICATION_STATS_HANDLER } from "./api/notification-stats";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -155,6 +158,10 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
     new HTTPRouter("settlements", SETTLEMENTS_HANDLER, [
         new HTTPRouter("stats", SETTLEMENTS_STATS_HANDLER)
+    ]),
+    new HTTPRouter("notification", NOTIFICATION_HANDLER, [
+        new HTTPRouter("read", NOTIFICATION_READ_HANDLER),
+        new HTTPRouter("stats", NOTIFICATION_STATS_HANDLER),
     ]),
 ]);
 

@@ -6,8 +6,8 @@ import { DB_CLIENT, server } from "..";
 import { Auth } from "../api/components/auth";
 import { API, APIError } from "core";
 import { ArrayMultimap } from "@teppeis/multimaps";
-import { Firebase } from "../api/components/firebase";
 import { User } from "../api/components/user";
+import { Notification } from "../api/components/notification";
 
 export type ChatConnection = {
     userId: string;
@@ -103,12 +103,12 @@ setImmediate(() => {
                 const uuid = API.createUUID()
                 const message = data.toString();
                 let isRead = target ? true : false;
+
+                // 주어진 메세지의 고유 정보.
+                const body = {uuid, message, senderId, sendedAt, isRead};
     
                 // 주어진 메세지의 응답 정보.
-                const response = JSON.stringify({
-                    type: "message",
-                    body: {uuid, message, senderId, sendedAt, isRead}
-                });
+                const response = JSON.stringify({type: "message", body});
     
                 // 메세지를 보낸 사용자를 수신하는 사용자가 있을 경우.
                 if (target) {
@@ -120,19 +120,19 @@ setImmediate(() => {
                         const displayName = await User.displayNameOf(userId);
     
                         if (given.type == "text") {
-                            await Firebase.sendFCM({
-                                userId: targetId,
-                                details: {body: response},
-                                notification: {
+                            await Notification.sendTo(targetId, {
+                                type: "message",
+                                data: JSON.stringify(body),
+                                body: {
                                     title: `${displayName}님이 메세지를 보냈습니다.`,
                                     body: given.body,
                                 }
                             });
                         } else {
-                            await Firebase.sendFCM({
-                                userId: targetId,
-                                details: {body: response},
-                                notification: {
+                            await Notification.sendTo(targetId, {
+                                type: "message",
+                                data: JSON.stringify(body),
+                                body: {
                                     title: `${displayName}님이 이미지 ${given.body.length}개 보냈습니다.`,
                                     imageUrl: given.body[0]
                                 }
