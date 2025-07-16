@@ -32,6 +32,6 @@ CREATE TABLE `UserDetails`(
     `address` JSON,
     `contactAs` VARCHAR(15),
     `serviceAreas` JSON,
-    `accountNumber` VARCHAR(32),
+    `accountDetails` JSON,
     FOREIGN KEY(`userId`) REFERENCES `User`(`id`)
 );
