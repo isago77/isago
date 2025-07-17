@@ -1,0 +1,42 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 저장소 불러오기
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Node.js 환경 구축
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.0
+
+      - name: 환경 변수 불러오기
+        run: |
+          cp test/test.env .env
+          cp test/test.redis.conf redis.conf
+
+      - name: Docker Compose 서비스 구축 및 시작
+        run: docker compose up -d
+
+      - name: Docker Compose 초기화 이후 다음 단계를 수행
+        run: sleep 10
+
+      - name: Node.js 의존성 설치
+        run: npm install
+
+      - name: Node.js 테스트 실행
+        run: npm test
+
+      - name: Docker Compose 서비스 종료
+        if: always()
+        run: docker compose down
