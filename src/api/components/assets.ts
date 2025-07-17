@@ -4,17 +4,18 @@ import { URLSearchParams } from "url";
 
 config()
 
+const protocol = process.env.ASSETS_SERVER_PROTOCOL;
 const host = process.env.ASSETS_SERVER_HOST;
 const port = process.env.ASSETS_SERVER_PORT;
 const apiKey = process.env.ASSETS_SERVER_API_KEY;
 
-if (!host || !apiKey) {
-  throw new Error("필수 환경 변수 누락됨: ASSETS_SERVER_HOST");
+if (!host || !apiKey || !protocol) {
+  throw new Error("필수 환경 변수 누락됨: ASSETS_SERVER_HOST 또는 ASSETS_SERVER_API_KEY 또는 ASSETS_SERVER_PROTOCOL");
 }
 
 export class Assets {
     /** 환경 변수에서 호스트와 포트를 조합해 기본 URL을 설정합니다. */
-    static url = new URL("http://" + (port ? `${host}:${port}` : host!));
+    static url = new URL(`${protocol}://` + (port ? `${host}:${port}` : host!));
 
     /**
      * 주어진 이미지 버퍼를 위임하여 제약 조건과 함께 에셋 서버에 이를 업로드하고,
