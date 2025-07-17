@@ -1,7 +1,9 @@
 // 웹소켓 관련 코드 초기화.
 import "./socket/chat";
 
-import http from "http";
+import fs from "fs";
+import http, { IncomingMessage, ServerResponse } from "http";
+import https from "https";
 import { config } from "dotenv";
 import { createPool } from "mariadb";
 import { createClient } from "redis";
@@ -59,6 +61,9 @@ import { NOTIFICATION_STATS_HANDLER } from "./api/notification-stats";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
+
+const SERVER_MODE = process.env.SERVER_MODE;
+const SERVER_PORT = process.env.SERVER_PORT;
 
 export const DB_CLIENT = createPool({
     host: process.env.MARIADB_HOST,
@@ -165,7 +170,11 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     ]),
 ]);
 
-export const server = http.createServer(async (request, response) => {
+/** HTTP/HTTPS 관련된 요청들을 위임하여 이를 처리합니다. */
+const handler = async (
+    request: IncomingMessage,
+    response: ServerResponse,
+) => {
     if (request.url === undefined) return;
 
     try {
@@ -177,8 +186,22 @@ export const server = http.createServer(async (request, response) => {
         response.writeHead(500);
         response.end(error instanceof Error ? error.message : undefined);
     }
-});
+}
 
-server.listen(8080, undefined, undefined, () => {
+export let server: http.Server;
+
+// 디버그 모드일 경우, 보안 프로토콜이 아닌 HTTP 서버를 생성합니다.
+if (SERVER_MODE == "debug") {
+    server = http.createServer(handler);
+} else {
+    const options: https.ServerOptions = {
+        key: fs.readFileSync("ssl/private.key"),
+        cert: fs.readFileSync("ssl/certificate.crt"),
+    }
+
+    server = https.createServer(options, handler);
+}
+
+server?.listen(Number(SERVER_PORT), undefined, undefined, () => {
     REDIS_CLIENT.connect();
 });

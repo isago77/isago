@@ -4,6 +4,8 @@
       "name": "isago-api",
       "script": "src/index.ts",
       "interpreter": "ts-node",
+      "exec_mode": "cluster",
+      "instances": 1,
       "watch": false,
       "autorestart": true
     }

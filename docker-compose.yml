@@ -8,6 +8,7 @@ services:
       - ./db/mariaDB:/var/lib/mysql
     ports:
       - "${MARIADB_PORT}:3306"
+    mem_limit: 512m
     environment:
       MARIADB_DATABASE: ${MARIADB_DATABASE}
       MARIADB_USER: ${MARIADB_USER}
@@ -17,17 +18,23 @@ services:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u ${MARIADB_USER} -p${MARIADB_PASSWORD}"]
       interval: 1s
       timeout: 1s
-      retries: 30 # 재시도 30s
+      retries: 60 # 재시도 30s
 
   redis:
     container_name: Redis
     image: redis:7.4-alpine
     command: redis-server /usr/local/etc/redis/redis.conf
+    mem_limit: 512m
     volumes:
       - ./db/redis/data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     ports:
       - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 1s
+      retries: 60 # 재시도 30s
 
   liquibase:
     container_name: MariaDB-Liquibase

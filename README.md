@@ -47,6 +47,15 @@ requirepass ...{0}
 
 ![firebase-console](https://github.com/user-attachments/assets/1b0e85d5-f55e-435b-aacc-d5638324208b)
 
+# 배포하기
+릴리스 환경에서 배포하기 위해서는 몇 가지 설정이 더 필요합니다. 우선 최상위 폴더에 `/ssl`라는 하위 폴더를 생성하고 HTTPS 인증서를 위한 `private.key`와 `certificate.crt` 파일을 해당 폴더에 삽입하세요.
+
+```
+ssl/private.key
+ssl/ca_bundle.crt
+ssl/certificate.crt
+```
+
 # 시작하기
 터미널에서 다음 명령을 차례로 입력합니다.
 

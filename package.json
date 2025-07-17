@@ -2,10 +2,13 @@
   "scripts": {
     "test": "jest",
     "build": "git submodule update --init --recursive",
-    "serve": "npm run build && npm-run-all --parallel start setup",
-    "start": "pm2 start deploy_config.json",
+    "start": "ts-node src/index.ts",
+    "serve": "pm2 start deploy_config.json",
+    "reserve": "pm2 restart deploy_config.json",
     "watch": "nodemon --watch src/**/* --ext ts",
-    "setup": "docker compose up -d mariaDB redis && docker compose run --rm liquibase"
+    "setup": "npm run docker:1 && npm run docker:2",
+    "docker:1": "docker compose up -d mariaDB redis",
+    "docker:2": "docker compose run --rm liquibase"
   },
   "devDependencies": {
     "@teppeis/multimaps": "^3.0.0",

@@ -16,10 +16,21 @@ jobs:
           username: ${{ secrets.REMOTE_USERNAME }}
           key: ${{ secrets.REMOTE_PRIMARY_KEY }}
           script: |
-            echo "업데이트된 저장소 불러오기"
-            cd /home/ec2-user/isago
+            export COMMIT_SHA="${{ github.sha }}";
+            export REMOTE_USERNAME="${{ secrets.REMOTE_USERNAME }}"
+            export MARIADB_PASSWORD="${{ secrets.MARIADB_PASSWORD }}"
+            export REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
+            export EMAIL_PASSWORD="${{ secrets.EMAIL_PASSWORD }}"
+            export COOLSMS_API_KEY="${{ secrets.COOLSMS_API_KEY }}"
+            export COOLSMS_SECRET_KEY="${{ secrets.COOLSMS_SECRET_KEY }}"
+            export COOLSMS_PHONE_NUMBER="${{ secrets.COOLSMS_PHONE_NUMBER }}"
+            export ASSETS_SERVER_API_KEY="${{ secrets.ASSETS_SERVER_API_KEY }}"
+            export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
+
+            echo "$COMMIT_SHA 저장소 불러오기"
+            cd /home/$REMOTE_USERNAME/isago
             git fetch origin main
-            git checkout $COMMIT_SHA
+            git reset --hard $COMMIT_SHA
 
             echo "환경 변수 파일 설정 중..."
             cp deploy.env .env
@@ -31,13 +42,28 @@ jobs:
             requirepass $REDIS_PASSWORD
             EOF
 
-            sudo npx pm2 kill
             sudo npm i --force
             sudo npm run build
-            sudo npm run setup
-            sudo npm run start
-        env:
-          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
-          GIT_PAT: ${{ secrets.GIT_PAT }}
-          COMMIT_SHA: ${{ github.sha }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+            sudo npm run docker:1
+
+            PREV_COMMIT=${{ github.event.workflow_run.head_commit.id }}^
+            CURR_COMMIT=${{ github.event.workflow_run.head_commit.id }}
+
+            # 변경된 파일 목록에서 liquibase 관련 파일이 있는지 확인.
+            if git diff --name-only "$PREV_COMMIT" "$CURR_COMMIT" | grep -q '^liquibase/'; then
+              echo "🔄 liquibase 관련 코드에 대한 변경이 감지되었습니다."
+              sudo npx pm2 kill
+              echo "MariaDB와 Redis가 완전히 초기화될 때까지 대기 중..."
+              while \
+                [ "$(docker inspect -f '{{.State.Health.Status}}' MariaDB)" != "healthy" ] || \
+                [ "$(docker inspect -f '{{.State.Health.Status}}' Redis)" != "healthy" ]; do
+                sleep 1
+              done
+              sudo npm run docker:2
+              sudo npm run start
+            else
+              echo "✅ liquibase 관련 코드에 대한 변경이 없습니다."
+              sudo npm run restart
+            fi
+
+            echo "🚀 자동화 배포가 완료되었습니다."
