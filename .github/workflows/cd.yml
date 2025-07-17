@@ -1,0 +1,43 @@
+name: CD
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH 원격으로 배포
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          key: ${{ secrets.REMOTE_PRIMARY_KEY }}
+          script: |
+            echo "업데이트된 저장소 불러오기"
+            cd /home/ec2-user/isago
+            git fetch origin main
+            git checkout $COMMIT_SHA
+
+            echo "환경 변수 파일 설정 중..."
+            cp deploy.env .env
+            envsubst < .env > .env.final
+            mv .env.final .env
+
+            echo "Redis 환경 설정 중..."
+            cat > redis.conf <<EOF
+            requirepass $REDIS_PASSWORD
+            EOF
+
+            sudo npx pm2 kill
+            sudo npm i --force
+            sudo npm run build
+            sudo npm run setup
+            sudo npm run start
+        env:
+          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+          GIT_PAT: ${{ secrets.GIT_PAT }}
+          COMMIT_SHA: ${{ github.sha }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}

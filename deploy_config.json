@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "name": "isago-api",
+      "script": "src/index.ts",
+      "interpreter": "ts-node",
+      "watch": false,
+      "autorestart": true
+    }
+  ]
+}

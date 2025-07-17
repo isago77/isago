@@ -26,10 +26,7 @@ jobs:
           cp test/test.redis.conf redis.conf
 
       - name: Docker Compose 서비스 구축 및 시작
-        run: docker compose up -d
-
-      - name: Docker Compose 초기화 이후 다음 단계를 수행
-        run: sleep 10
+        run: npm run setup
 
       - name: Node.js 의존성 설치
         run: npm install
