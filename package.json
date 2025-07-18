@@ -6,9 +6,9 @@
     "serve": "pm2 start deploy_config.json",
     "reserve": "pm2 restart deploy_config.json",
     "watch": "nodemon --watch src/**/* --ext ts",
-    "setup": "npm run docker:1 && npm run docker:2",
-    "docker:1": "docker compose up -d mariaDB redis",
-    "docker:2": "docker compose run --rm liquibase"
+    "setup": "npm run docker:service && npm run docker:migrate",
+    "docker:service": "docker compose up -d mariaDB redis",
+    "docker:migrate": "docker compose run --rm liquibase"
   },
   "devDependencies": {
     "@teppeis/multimaps": "^3.0.0",

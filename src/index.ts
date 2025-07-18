@@ -193,13 +193,18 @@ export let server: http.Server;
 // 디버그 모드일 경우, 보안 프로토콜이 아닌 HTTP 서버를 생성합니다.
 if (SERVER_MODE == "debug") {
     server = http.createServer(handler);
-} else {
+} else if (SERVER_MODE == "release") {
     const options: https.ServerOptions = {
         key: fs.readFileSync("ssl/private.key"),
         cert: fs.readFileSync("ssl/certificate.crt"),
     }
 
     server = https.createServer(options, handler);
+} else {
+    throw Error(
+        "필수 환경 변수 값인 'SERVER_MODE'(이)가 올바르게 정의되지 않았습니다." +
+        "(e.g. 해당 값은 무조건 debug 또는 release으(로) 정의되어야 합니다.)"
+    );
 }
 
 server?.listen(Number(SERVER_PORT), undefined, undefined, () => {

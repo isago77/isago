@@ -44,7 +44,7 @@ jobs:
 
             sudo npm i --force
             sudo npm run build
-            sudo npm run docker:1
+            sudo npm run docker:service
 
             PREV_COMMIT=${{ github.event.workflow_run.head_commit.id }}^
             CURR_COMMIT=${{ github.event.workflow_run.head_commit.id }}
@@ -59,7 +59,7 @@ jobs:
                 [ "$(docker inspect -f '{{.State.Health.Status}}' Redis)" != "healthy" ]; do
                 sleep 1
               done
-              sudo npm run docker:2
+              sudo npm run docker:migrate
               sudo npm run serve
             else
               echo "🟠 liquibase 관련 코드에 대한 변경이 없습니다."
