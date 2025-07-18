@@ -6,9 +6,11 @@
 | [Node.js](https://nodejs.org/) | 22.17.0 |
 
 # 설정하기
-server/ 폴더에 `.env` 파일을 생성하고 아래 형식에 따라 코드를 작성합니다.
+server/ 폴더에 `.env` 파일을 생성하고 아래 형식에 따라 코드를 작성합니다. 또는 /test/test.env를 복사하여 최상위 폴더에 붙여넣기 하고 해당 파일에 대한 이름을 `.env`으로 변경하는 방법이 있습니다.
 
 ```env
+SERVER_PORT=8080
+SERVER_MODE=debug
 MARIADB_HOST=localhost
 MARIADB_PORT=3306
 MARIADB_USER=root

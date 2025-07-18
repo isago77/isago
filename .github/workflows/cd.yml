@@ -27,17 +27,17 @@ jobs:
             export ASSETS_SERVER_API_KEY="${{ secrets.ASSETS_SERVER_API_KEY }}"
             export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
 
-            echo "$COMMIT_SHA 저장소 불러오기"
+            echo "⚪ $COMMIT_SHA 저장소 불러오기"
             cd /home/$REMOTE_USERNAME/isago
             git fetch origin main
             git reset --hard $COMMIT_SHA
 
-            echo "환경 변수 파일 설정 중..."
+            echo "⚪ 환경 변수 파일 설정 중..."
             cp deploy.env .env
             envsubst < .env > .env.final
             mv .env.final .env
 
-            echo "Redis 환경 설정 중..."
+            echo "⚪ Redis 환경 설정 중..."
             cat > redis.conf <<EOF
             requirepass $REDIS_PASSWORD
             EOF
@@ -51,9 +51,9 @@ jobs:
 
             # 변경된 파일 목록에서 liquibase 관련 파일이 있는지 확인.
             if git diff --name-only "$PREV_COMMIT" "$CURR_COMMIT" | grep -q '^liquibase/'; then
-              echo "🔄 liquibase 관련 코드에 대한 변경이 감지되었습니다."
+              echo "🟠 liquibase 관련 코드에 대한 변경이 감지되었습니다."
               sudo npx pm2 kill
-              echo "MariaDB와 Redis가 완전히 초기화될 때까지 대기 중..."
+              echo "🟡 MariaDB와 Redis가 완전히 초기화될 때까지 대기 중..."
               while \
                 [ "$(docker inspect -f '{{.State.Health.Status}}' MariaDB)" != "healthy" ] || \
                 [ "$(docker inspect -f '{{.State.Health.Status}}' Redis)" != "healthy" ]; do
@@ -62,8 +62,8 @@ jobs:
               sudo npm run docker:2
               sudo npm run serve
             else
-              echo "✅ liquibase 관련 코드에 대한 변경이 없습니다."
+              echo "🟠 liquibase 관련 코드에 대한 변경이 없습니다."
               sudo npm run reserve
             fi
 
-            echo "🚀 자동화 배포가 완료되었습니다."
+            echo "🟢 자동화 배포가 완료되었습니다."
