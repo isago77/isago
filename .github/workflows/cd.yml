@@ -60,10 +60,10 @@ jobs:
                 sleep 1
               done
               sudo npm run docker:2
-              sudo npm run start
+              sudo npm run serve
             else
               echo "✅ liquibase 관련 코드에 대한 변경이 없습니다."
-              sudo npm run restart
+              sudo npm run reserve
             fi
 
             echo "🚀 자동화 배포가 완료되었습니다."
