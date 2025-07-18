@@ -11,6 +11,7 @@ server/ 폴더에 `.env` 파일을 생성하고 아래 형식에 따라 코드�
 ```env
 SERVER_PORT=8080
 SERVER_MODE=debug
+DECRYPTION_KEY=...
 MARIADB_HOST=localhost
 MARIADB_PORT=3306
 MARIADB_USER=root

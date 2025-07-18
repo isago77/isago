@@ -5,6 +5,7 @@ import { Auth, AuthProvider } from "./components/auth";
 import { APISchema } from "./components/api_schema";
 import { SQLModifier } from "../sql/sql_modifer";
 import { SQLTransaction } from "../sql/sql_transaction";
+import { Secure } from "./components/secure";
 
 const Link = z.object({
     label: z.string().nullable(),
@@ -29,7 +30,7 @@ const ProfileSelfPatchRequest = z.object({
     address: APISchema.address.optional(),
     contactAs: APISchema.phoneNumber.optional(),
     serviceAreas: z.array(z.string()).optional(),
-    accountDetails: z.string(AccountDetails).optional(),
+    accountDetails: AccountDetails.optional(),
 });
 
 // profile/self
@@ -76,6 +77,14 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
             if (row) result = {...result, ...row};
         }
 
+        // 암호화되었던 사용자의 전화번호를 복호화합니다.
+        result.phoneNumber = Secure.decrypt(result.phoneNumber);
+
+        // 암호화되었던 사용자의 계좌 상세 정보를 복호화합니다.
+        if (result.accountDetails) {
+            result.accountDetails = JSON.parse(Secure.decrypt(result.accountDetails));
+        }
+
         API.success(response, result);
     }),
     patch: Auth.delegate(async (_, response, body, userId) => {
@@ -96,7 +105,10 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
                         throw APIError.INVALID_PHONE_NUMBER_TOKEN;
                     }
 
-                    modifier.add("phoneNumber", phoneNumber);
+                    // 개인 정보인 사용자의 전화번호를 암호화하여 이를 영구 저장하도록 합니다.
+                    const encryptedPhoneNumber = JSON.stringify(Secure.encrypt(phoneNumber));
+
+                    modifier.add("phoneNumber", encryptedPhoneNumber);
                 }
 
                 await modifier.safety(async () => {
@@ -114,7 +126,15 @@ export const PROFILE_SELF_HANDLER = new HTTPHandler({
                 modifier.addIfDefined(given, "links");
                 modifier.addIfDefined(given, "address")
                 modifier.addIfDefined(given, "serviceAreas");
-                modifier.addIfDefined(given, "accountDetails");
+
+                if (given.accountDetails) {
+                    // 개인 정보인 사용자의 전화번호를 암호화하여 이를 영구 저장하도록 합니다.
+                    const encryptedData = JSON.stringify(
+                        Secure.encrypt(JSON.stringify(given.accountDetails))
+                    );
+
+                    modifier.add("accountDetails", encryptedData)
+                }
 
                 // 검증된 사용자(e.g. 업체, 견적 방문자, 관리자)이기 때문에 별도의 인증은 필요 없음.
                 if (given.contactAs) {

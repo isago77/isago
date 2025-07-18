@@ -2,6 +2,7 @@ import { API, APIError, HTTPHandler } from "core";
 import { z } from "zod";
 import { APISchema } from "./components/api_schema";
 import { DB_CLIENT } from "..";
+import { Secure } from "./components/secure";
 
 const ProfileRequest = z.object({
     uuid: APISchema.uuid
@@ -52,6 +53,9 @@ export const PROFILE_HANDLER = new HTTPHandler({
             // 데이터 병합.
             if (row) result = {...result, ...row};
         }
+
+        // 암호화되었던 사용자의 전화번호를 복호화합니다.
+        result.phoneNumber = Secure.decrypt(result.phoneNumber);
 
         API.success(response, result);
     }

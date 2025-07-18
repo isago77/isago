@@ -4,6 +4,7 @@ import { APISchema } from "./components/api_schema";
 import { REDIS_CLIENT } from "..";
 import { Auth } from "./components/auth";
 import { SQLTransaction } from "../sql/sql_transaction";
+import { Secure } from "./components/secure";
 
 /** 서버 측에서 정의한 OAuth 회원가입 요청 정보에 대한 데이터 형태. */
 const SignUpOAuth = z.object({
@@ -57,10 +58,13 @@ export const SIGN_UP_OAUTH_HANDLER = new HTTPHandler({
             "marketingAccepted"
         ];
 
+        // 개인 정보인 사용자의 전화번호를 암호화하여 이를 영구 저장하도록 합니다.
+        const encryptedPhoneNumber = JSON.stringify(Secure.encrypt(phoneNumber));
+
         await SQLTransaction.perform(async (db) => {
             await db.query(
                 `INSERT INTO User(${fields.join(", ")}) VALUES(${fields.map(_ => "?").join(", ")})`,
-                [userId, displayName, phoneNumber, given.marketingAccepted]
+                [userId, displayName, encryptedPhoneNumber, given.marketingAccepted]
             );
 
             await db.query(

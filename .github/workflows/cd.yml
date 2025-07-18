@@ -21,6 +21,7 @@ jobs:
             export MARIADB_PASSWORD="${{ secrets.MARIADB_PASSWORD }}"
             export REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
             export EMAIL_PASSWORD="${{ secrets.EMAIL_PASSWORD }}"
+            export DECRYPTION_KEY="${{ secrets.DECRYPTION_KEY }}"
             export COOLSMS_API_KEY="${{ secrets.COOLSMS_API_KEY }}"
             export COOLSMS_SECRET_KEY="${{ secrets.COOLSMS_SECRET_KEY }}"
             export COOLSMS_PHONE_NUMBER="${{ secrets.COOLSMS_PHONE_NUMBER }}"

@@ -5,6 +5,7 @@ import { Auth } from "./components/auth";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { SignUpRequest, validSignUpRequest } from "./sign_up";
 import { randomBytes } from "crypto";
+import { Secure } from "./components/secure";
 
 /** 서버 측에서 정의한 회원가입 요청 정보에 대한 데이터 형태. */
 const SignUpAuth = SignUpRequest.extend({
@@ -20,7 +21,6 @@ export const SignUpVerifyRequest = z.object({
 // sign-up/verify
 export const SIGN_UP_VERIFY_HANDLER = new HTTPHandler({
     post: async (_, response, body) => {
-        console.log("sdfsdfdsfs");
         const given = API.tryParseJSON(SignUpVerifyRequest, body);
 
         const rawInfo = await REDIS_CLIENT.hGet("SignUpAuth", given.uuid);
@@ -62,9 +62,12 @@ export const SIGN_UP_VERIFY_HANDLER = new HTTPHandler({
             throw APIError.INVALID_PHONE_NUMBER_TOKEN;
         }
 
+        // 개인 정보인 사용자의 전화번호를 암호화하여 이를 영구 저장하도록 합니다.
+        const encryptedPhoneNumber = JSON.stringify(Secure.encrypt(phoneNumber));
+
         await DB_CLIENT.query(
             `INSERT INTO User(${fields.join(", ")}) VALUES(${fields.map(_ => "?").join(", ")})`,
-            [userId, email, displayName, phoneNumber, password, passSalt, info.marketingAccepted]
+            [userId, email, displayName, encryptedPhoneNumber, password, passSalt, info.marketingAccepted]
         );
 
         // 회원가입 작업이 최종적으로 완료되었으므로 인증 번호에 대한 UUID이(가) 만료되어야 함.

@@ -9,7 +9,6 @@ export class SQLTransaction {
             await func(db);
             await db.query("COMMIT");
         } catch (error) {
-            console.log(error);
             await db.query("ROLLBACK");
             throw error;
         } finally {
