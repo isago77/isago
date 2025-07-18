@@ -195,6 +195,7 @@ if (SERVER_MODE == "debug") {
     server = http.createServer(handler);
 } else if (SERVER_MODE == "release") {
     const options: https.ServerOptions = {
+        ca: fs.readFileSync("ssl/ca_bundle.crt"),
         key: fs.readFileSync("ssl/private.key"),
         cert: fs.readFileSync("ssl/certificate.crt"),
     }
