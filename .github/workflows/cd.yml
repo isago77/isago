@@ -5,6 +5,10 @@ on:
     types:
       - completed
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -34,9 +38,7 @@ jobs:
             git reset --hard $COMMIT_SHA
 
             echo "⚪ 환경 변수 파일 설정 중..."
-            cp deploy.env .env
-            envsubst < .env > .env.final
-            mv .env.final .env
+            envsubst < deploy.env > .env
 
             echo "⚪ Redis 환경 설정 중..."
             cat > redis.conf <<EOF
@@ -52,8 +54,8 @@ jobs:
 
             echo "🟡 MariaDB와 Redis가 완전히 초기화될 때까지 대기 중..."
             while \
-              [ "$(docker inspect -f '{{.State.Health.Status}}' MariaDB)" != "healthy" ] || \
-              [ "$(docker inspect -f '{{.State.Health.Status}}' Redis)" != "healthy" ]; do
+              [ "$(sudo docker inspect -f '{{.State.Health.Status}}' MariaDB)" != "healthy" ] || \
+              [ "$(sudo docker inspect -f '{{.State.Health.Status}}' Redis)" != "healthy" ]; do
               sleep 1
             done
 
