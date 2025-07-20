@@ -6,6 +6,7 @@ import { API } from "core/src";
 import { DB_CLIENT } from "../..";
 import { SQLTransaction } from "../../sql/sql_transaction";
 import { StageStatus } from "./components/stage_status";
+import { Notification } from "../components/notification";
 
 const StagePostRequest = z.object({
     availableId: APISchema.uuid.optional(),
@@ -62,10 +63,22 @@ export const STAGE_HANDLER = new HTTPHandler({
                     throw StageError.EXPIRED_ESTIMATOR_AVAILABILITY;
                 }
 
+                const estimatorId = row.estimatorId;
+
                 await db.query(
                     "INSERT INTO EstimatorStage(id, stageId, estimatorId, visitDate) VALUES(?, ?, ?, ?)",
-                    [API.createUUID(), uuid, row.estimatorId, row.date]
+                    [API.createUUID(), uuid, estimatorId, row.date]
                 );
+
+                // 새로운 이사 절차에 자동 할당된 견적 방문자에게 해당 사실을 알림.
+                Notification.sendTo(estimatorId, {
+                    type: "stageAssigned",
+                    data: JSON.stringify({stageId: uuid}),
+                    body: {
+                        title: "새로운 이사 절차에 할당되었습니다!",
+                        body: given.fromAddress.street,
+                    }
+                });
             }
         });
 

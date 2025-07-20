@@ -8,6 +8,7 @@ import { StageEstimatorError } from "./stage-estimator";
 import { SQLTransaction } from "../../sql/sql_transaction";
 import { StageStatus } from "./components/stage_status";
 import { StageEstimatorStatus } from "./components/stage_estimator_status";
+import { Notification } from "../components/notification";
 
 const StageEstimatorDoneRequest = z.object({
     uuid: APISchema.uuid
@@ -65,6 +66,23 @@ export const STAGE_ESTIMATOR_DONE_HANDLER = new HTTPHandler({
                 [StageEstimatorStatus.completed, given.uuid]
             );
         });
+
+        // 최종적으로 견적 절차가 완료되었다는 사실을 사용자에게 알림.
+        (async () => {
+            const [stage] = await DB_CLIENT.query(
+                "SELECT userId FROM Stage WHERE id = ? LIMIT 1",
+                [stageId]
+            );
+
+            await Notification.sendTo(stage.userId, {
+                type: "estimatorDone",
+                data: JSON.stringify({stageId, estimatorStageId: given.uuid}),
+                body: {
+                    title: "견적 방문자가 견적을 완료했어요",
+                    body: "이제 이사 업체들이 해당 견적서를 바탕으로 제안을 보낼 거예요."
+                }
+            });
+        })().catch(() => null);
 
         API.success(response, {uuid: stageId});
     })

@@ -8,6 +8,7 @@ import { APIError } from "core/src";
 import { StageStatus } from "./components/stage_status";
 import { SQLModifier } from "../../sql/sql_modifer";
 import { SQLTransaction } from "../../sql/sql_transaction";
+import { Notification } from "../components/notification";
 
 const StageEstimatorPostRequest = z.object({
     uuid: APISchema.uuid
@@ -46,19 +47,18 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
             throw UserError.ONLY_ESTIMATOR;
         }
 
-        { // 요청한 이사 절차에 대한 유효성 검사.
-            const [row] = await DB_CLIENT.query(
-                "SELECT status FROM Stage WHERE id = ? LIMIT 1",
-                [given.uuid]
-            );
+        // 요청한 이사 절차에 대한 유효성 검사.
+        const [stage] = await DB_CLIENT.query(
+            "SELECT status, userId FROM Stage WHERE id = ? LIMIT 1",
+            [given.uuid]
+        );
 
-            // 유효하지 않은 UUID인 경우.
-            if (!row) throw APIError.INVALID_UUID;
+        // 유효하지 않은 UUID인 경우.
+        if (!stage) throw APIError.INVALID_UUID;
 
-            // 견적 방문자가 이미 할당되어 이사 절차가 진행 중인 경우.
-            if (row.status != StageStatus.waitingEstimator) {
-                throw StageEstimatorError.ONLY_WAITING_ESTIMATOR_STATUS;
-            }
+        // 견적 방문자가 이미 할당되어 이사 절차가 진행 중인 경우.
+        if (stage.status != StageStatus.waitingEstimator) {
+            throw StageEstimatorError.ONLY_WAITING_ESTIMATOR_STATUS;
         }
 
         const uuid = API.createUUID();
@@ -74,26 +74,39 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
             );
         });
 
+        // 빠른 응답을 위해 알림 전송은 별개로.
+        User.displayNameOf(userId).then(async displayName => {
+
+            // 새로운 이사 절차에 자동 할당된 견적 방문자에게 해당 사실을 알림.
+            await Notification.sendTo(stage.userId, {
+                type: "estimatorAssigned",
+                data: JSON.stringify({stageId: uuid}),
+                body: {
+                    title: "견적 방문자가 할당되었습니다!",
+                    body: `이제 ${displayName}님이 당신의 이사를 도와드릴거에요.`,
+                }
+            });
+        }).catch(() => null);
+
         API.success(response, {uuid});
     }),
     patch: Auth.delegate(async (_, response, body, userId) => {
         const given = API.tryParseJSON(StageEstimatorPatchRequest, body);
 
-        { // 유효성 검사 및 제약 조건 확인.
-            const [row] = await DB_CLIENT.query(
-                "SELECT estimatorId FROM EstimatorStage WHERE id = ? LIMIT 1",
-                [given.uuid]
-            );
+        // 유효성 검사 및 제약 조건 확인.
+        const [estimatorStage] = await DB_CLIENT.query(
+            "SELECT estimatorId, stageId FROM EstimatorStage WHERE id = ? LIMIT 1",
+            [given.uuid]
+        );
 
-            // 유효하지 않은 UUID인 경우.
-            if (!row) {
-                throw APIError.INVALID_UUID;
-            }
+        // 유효하지 않은 UUID인 경우.
+        if (!estimatorStage) {
+            throw APIError.INVALID_UUID;
+        }
 
-            // 해당 이사 절차에서 할당된 견적 담당자가 아닌 경우.
-            if (row.estimatorId != userId) {
-                throw StageEstimatorError.ESTIMATOR_NOT_ASSIGNED_TO_STAGE;
-            }
+        // 해당 이사 절차에서 할당된 견적 담당자가 아닌 경우.
+        if (estimatorStage.estimatorId != userId) {
+            throw StageEstimatorError.ESTIMATOR_NOT_ASSIGNED_TO_STAGE;
         }
 
         const modifier = new SQLModifier();
@@ -113,6 +126,42 @@ export const STAGE_ESTIMATOR_HANDLER = new HTTPHandler({
                 throw StageEstimatorError.ESTIMATOR_NOT_ASSIGNED_TO_STAGE
             }
         });
+
+        // 견적 절차에 대한 이사 절차의 사용자에게 해당 사실을 알림.
+        if (given.status == "visiting"
+         || given.status == "visited") {
+            (async () => {
+                const [stage] = await DB_CLIENT.query(
+                    "SELECT userId FROM Stage WHERE id = ? LIMIT 1",
+                    [estimatorStage.stageId]
+                );
+
+                const data = JSON.stringify({
+                    stageId: estimatorStage.stageId,
+                    estimatorStageId: given.uuid,
+                });
+
+                if (given.status == "visiting") {
+                    await Notification.sendTo(stage.userId, {
+                        type: "estimatorVisiting",
+                        data: data,
+                        body: {
+                            title: "견적 방문자가 방문 중이에요",
+                            body: "잠시 후 도착할 예정이에요. 문의사항이 있으면 미리 준비해 주세요.",
+                        }
+                    });
+                } else {
+                    await Notification.sendTo(stage.userId, {
+                        type: "estimatorVisited",
+                        data: data,
+                        body: {
+                            title: "견적 방문자가 견적을 시작했어요",
+                            body: "견적이 완료되면 결과를 앱에서 바로 확인하실 수도 있어요."
+                        }
+                    });
+                }
+            })().catch(() => null);
+        }
 
         API.success(response, undefined);
     }),
