@@ -5,6 +5,8 @@ import { DB_CLIENT, REDIS_CLIENT } from "../..";
 import { SQLTransaction } from "../../sql/sql_transaction";
 import { StageStatus } from "./components/stage_status";
 import { Payment } from "../components/payment";
+import { Notification } from "../components/notification";
+import { User } from "../components/user";
 
 /** 주어진 데이터를 기반으로 토스페이먼츠 측 결제를 시도합니다. */
 async function confirm(data: {
@@ -56,7 +58,7 @@ export const STAGE_MOVER_PAYMENT_CONFIRM_HANDLER = new HTTPHandler({
             throw StageMoverPaymentConfirmError.INVALID_PAYMENT_AMOUNT;
         }
 
-        const [row] = await DB_CLIENT.query(
+        const [moverRequest] = await DB_CLIENT.query(
             "SELECT id, stageId, moverId FROM MoverRequest WHERE id = ?",
             [info.requestId]
         );
@@ -76,14 +78,39 @@ export const STAGE_MOVER_PAYMENT_CONFIRM_HANDLER = new HTTPHandler({
         await SQLTransaction.perform(async (db) => {
             await db.query(
                 "INSERT INTO MoverStage(id, stageId, requestId, paymentKey) VALUES(?, ?, ?, ?)",
-                [uuid, row.stageId, row.id, given.paymentKey]
+                [uuid, moverRequest.stageId, moverRequest.id, given.paymentKey]
             );
 
             await db.query(
                 "UPDATE Stage SET status = ? WHERE id = ?",
-                [StageStatus.requestAccepted, row.stageId]
+                [StageStatus.requestAccepted, moverRequest.stageId]
             );
         });
+
+        // 사용자가 이사 업체의 제안을 수락하고 결제하였다는 사실을 이사 업체에게 알림.
+        (async () => {
+            const [stage] = await DB_CLIENT.query(
+                "SELECT userId FROM Stage WHERE id = ? LIMIT 1",
+                [moverRequest.stageId]
+            );
+
+            // 해당 이사 절차에 대한 사용자 이름.
+            const displayName = await User.displayNameOf(stage.userId);
+
+            const data = JSON.stringify({
+                stageId: moverRequest.stageId,
+                requestId: info.requestId,
+            });
+
+            await Notification.sendTo(moverRequest.moverId, {
+                type: "requestAccepted",
+                data: data,
+                body: {
+                    title: `${displayName}님이 당신의 제안을 수락했어요`,
+                    body: "정확한 이사 날짜를 조율하고 절차가 완료되면 금액이 정산됩니다.",
+                }
+            });
+        })().catch(() => null);
 
         API.success(response, {uuid});
     }

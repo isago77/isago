@@ -5,6 +5,7 @@ import { Auth } from "../components/auth";
 import { DB_CLIENT } from "../..";
 import { SQLModifier } from "../../sql/sql_modifer";
 import { User, UserRole } from "../components/user";
+import { Notification } from "../components/notification";
 
 const StageMoverPatchRequest = z.object({
     uuid: APISchema.uuid,
@@ -29,24 +30,24 @@ export const STAGE_MOVER_HANDLER = new HTTPHandler({
     patch: Auth.delegate(async (_, response, body, userId) => {
         const given = API.tryParseJSON(StageMoverPatchRequest, body);
 
-        { // 유효성 검사 및 제약 조건 확인.
-            const [row] = await DB_CLIENT.query(
-                `
-                    SELECT b.moverId FROM MoverStage a JOIN MoverRequest b ON b.id = a.requestId
-                    WHERE a.id = ? LIMIT 1
-                `,
-                [given.uuid]
-            );
+        // 유효성 검사 및 제약 조건 확인.
+        const [moverStage] = await DB_CLIENT.query(
+            `
+                SELECT a.stageId, b.moverId FROM MoverStage a
+                JOIN MoverRequest b ON b.id = a.requestId
+                WHERE a.id = ? LIMIT 1
+            `,
+            [given.uuid]
+        );
 
-            // 유효하지 않은 UUID인 경우.
-            if (!row) {
-                throw APIError.INVALID_UUID;
-            }
+        // 유효하지 않은 UUID인 경우.
+        if (!moverStage) {
+            throw APIError.INVALID_UUID;
+        }
 
-            // 해당 이사 절차에서 할당된 견적 담당자가 아닌 경우.
-            if (row.moverId != userId) {
-                throw StageMoverError.MOVER_NOT_ASSIGNED_TO_STAGE;
-            }
+        // 해당 이사 절차에서 할당된 견적 담당자가 아닌 경우.
+        if (moverStage.moverId != userId) {
+            throw StageMoverError.MOVER_NOT_ASSIGNED_TO_STAGE;
         }
 
         const modifier = new SQLModifier();
@@ -66,6 +67,42 @@ export const STAGE_MOVER_HANDLER = new HTTPHandler({
                 throw StageMoverError.MOVER_NOT_ASSIGNED_TO_STAGE
             }
         });
+
+        // 이사 절차에 대한 변경 사항이 발생하여 사용자에게 해당 사실을 알림.
+        if (given.status == "visiting"
+         || given.status == "working") {
+            (async () => {
+                const [stage] = await DB_CLIENT.query(
+                    "SELECT userId FROM Stage WHERE id = ? LIMIT 1",
+                    [moverStage.stageId]
+                );
+
+                const data = JSON.stringify({
+                    stageId: moverStage.stageId,
+                    moverStageId: given.uuid,
+                });
+
+                if (given.status == "visiting") {
+                    await Notification.sendTo(stage.userId, {
+                        type: "moverVisiting",
+                        data: data,
+                        body: {
+                            title: "이사 업체가 방문 중이에요",
+                            body: "잠시 후 도착할 예정이에요. 문의사항이 있으면 미리 준비해 주세요.",
+                        }
+                    });
+                } else {
+                    await Notification.sendTo(stage.userId, {
+                        type: "moverWorking",
+                        data: data,
+                        body: {
+                            title: "이사가 시작됐어요",
+                            body: "이사 업체가 작업 중이에요. 끝나면 바로 알려드릴게요!"
+                        }
+                    });
+                }
+            })().catch(() => null);
+        }
 
         API.success(response, undefined);
     }),

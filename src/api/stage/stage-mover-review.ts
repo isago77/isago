@@ -4,6 +4,8 @@ import { Auth } from "../components/auth";
 import { APISchema } from "../components/api_schema";
 import { DB_CLIENT } from "../..";
 import { StageMoverStatus } from "./components/stage_mover_status";
+import { Notification } from "../components/notification";
+import { User } from "../components/user";
 
 const StageMoverReviewPostRequest = z.object({
     stageId: APISchema.uuid,
@@ -61,6 +63,31 @@ export const STAGE_MOVER_REVIEW_HANDLER = new HTTPHandler({
         if (result.affectedRows == 0) {
             throw StageMoverReviewError.ALREADY_MOVER_REVIEW;
         }
+
+        // 사용자가 이사 업체에 대한 리뷰를 작성했다는 사실을 이사 업체에게 알림.
+        (async () => {
+            const [moverStage] = await DB_CLIENT.query(
+                "SELECT id, moverId FROM MoverStage WHERE stageId = ? LIMIT 1",
+                [given.stageId]
+            );
+
+            // 해당 이사 절차에 대해서 리뷰를 남긴 사용자 이름.
+            const displayName = await User.displayNameOf(stage.userId);
+
+            const data = JSON.stringify({
+                stageId: given.stageId,
+                moverStageId: moverStage.id,
+            });
+
+            await Notification.sendTo(moverStage.moverId, {
+                type: "moverReview",
+                data: data,
+                body: {
+                    title: `${displayName}님이 리뷰를 작성했어요`,
+                    body: "리뷰를 꼭 확인하시고 더 나은 서비스 제공에 활용해 주세요!"
+                }
+            });
+        })().catch(() => null);
 
         API.success(response, {uuid});
     }),

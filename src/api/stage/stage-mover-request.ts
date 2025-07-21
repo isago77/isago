@@ -7,6 +7,7 @@ import { DB_CLIENT } from "../..";
 import { StageStatus } from "./components/stage_status";
 import { User, UserError, UserRole } from "../components/user";
 import { SQLSearcher } from "../../sql/sql_searcher";
+import { Notification } from "../components/notification";
 
 const StageMoverRequestPostRequest = z.object({
     uuid: APISchema.uuid,
@@ -40,19 +41,18 @@ export const STAGE_MOVER_REQUEST_HANDLER = new HTTPHandler({
             throw UserError.ONLY_MOVER;
         }
 
-        { // 유효성 검사.
-            const [row] = await DB_CLIENT.query(
-                "SELECT status FROM Stage WHERE id = ? LIMIT 1",
-                [given.uuid]
-            );
+        // 유효성 검사.
+        const [stage] = await DB_CLIENT.query(
+            "SELECT status, userId FROM Stage WHERE id = ? LIMIT 1",
+            [given.uuid]
+        );
 
-            // 유효하지 않은 UUID인 경우.
-            if (!row) throw APIError.INVALID_UUID;
+        // 유효하지 않은 UUID인 경우.
+        if (!stage) throw APIError.INVALID_UUID;
 
-            // 그 전 단계이거나 이미 이사 업체가 할당되어 본격적인 이사 절차가 진행 중인 경우.
-            if (row.status != StageStatus.waitingMover) {
-                throw StageMoverRequestError.ONLY_WAITING_MOVER_STATUS;
-            }
+        // 그 전 단계이거나 이미 이사 업체가 할당되어 본격적인 이사 절차가 진행 중인 경우.
+        if (stage.status != StageStatus.waitingMover) {
+            throw StageMoverRequestError.ONLY_WAITING_MOVER_STATUS;
         }
 
         const [row] = await DB_CLIENT.query(
@@ -69,6 +69,20 @@ export const STAGE_MOVER_REQUEST_HANDLER = new HTTPHandler({
             "INSERT INTO MoverRequest(id, stageId, moverId, proposedPrice, note) VALUES (?, ?, ?, ?, ?)",
             [uuid, given.uuid, userId, given.proposedPrice, given.note]
         );
+
+        // 이사 업체가 견적을 제안한 이사 절차의 사용자에게 해당 사실을 알림.
+        User.displayNameOf(userId).then(async displayName => {
+            const formater = new Intl.NumberFormat("ko-KR");
+
+            await Notification.sendTo(stage.userId, {
+                type: "moverRequest",
+                data: JSON.stringify({stageId: given.uuid, requestId: uuid}),
+                body: {
+                    title: "새로운 이사 제안이 도착했어요!",
+                    body: `${displayName}님이 ${formater.format(given.proposedPrice)}원에 이사를 제안했어요. 앱에서 상세 내용을 확인해 보세요.`,
+                }
+            });
+        }).catch(() => null);
 
         API.success(response, {uuid})
     }),
