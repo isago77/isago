@@ -75,6 +75,7 @@ export const STAGE_MOVER_REVIEW_HANDLER = new HTTPHandler({
             const displayName = await User.displayNameOf(stage.userId);
 
             const data = JSON.stringify({
+                uuid: uuid,
                 stageId: given.stageId,
                 moverStageId: moverStage.id,
             });
