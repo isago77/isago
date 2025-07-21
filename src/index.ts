@@ -1,5 +1,8 @@
-// 웹소켓 관련 코드 초기화.
+// 채팅에 대한 웹소켓 관련 코드.
 import "./socket/chat";
+
+// 전역 예외 처리와 관련된 코드.
+import "./static_exception";
 
 import fs from "fs";
 import http, { IncomingMessage, ServerResponse } from "http";
