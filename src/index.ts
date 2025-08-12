@@ -23,7 +23,7 @@ import { SIGN_OUT_HANDLER } from "./api/sign_out";
 import { AUTH_PHONE_NUMBER_HANDLER } from "./api/auth-phone_number";
 import { AUTH_PHONE_NUMBER_VERIFY_HANDLER } from "./api/auth-phone_number-verify";
 import { HTTPConnection, HTTPRouter } from "core";
-import { IMAGE_PROFILE_HANDLER } from "./api/image-profile";
+import { IMAGE_PROFILE_HANDLER } from "./api/image/image-profile";
 import { SIGN_UP_VERIFY_HANDLER } from "./api/sign_up-verify";
 import { PROFILE_ROLE_HANDLER } from "./api/profile-role";
 import { ISSUE_ROLE_SERIAL_HANDLER } from "./api/issue-role_serial";
@@ -38,9 +38,9 @@ import { STAGE_MOVER_REQUEST_HANDLER } from "./api/stage/stage-mover-request";
 import { STAGE_SELF_HANDLER } from "./api/stage/stage-self";
 import { STAGE_MOVER_PAYMENT_HANDLER } from "./api/stage/stage-mover-payment";
 import { STAGE_MOVER_PAYMENT_CONFIRM_HANDLER } from "./api/stage/stage-mover-payment-confirm";
-import { IMAGE_ESTIMATOR_HANDLER } from "./api/image-estimator";
+import { IMAGE_ESTIMATOR_HANDLER } from "./api/image/image-estimator";
 import { STAGE_MOVER_REQUEST_COUNT_HANDLER } from "./api/stage/stage-mover-request-count";
-import { IMAGE_BANNER_HANDLER } from "./api/image-banner";
+import { IMAGE_BANNER_HANDLER } from "./api/image/image-banner";
 import { STAGE_CANCEL_HANDLER } from "./api/stage/stage-cancel";
 import { STAGE_MOVER_HANDLER } from "./api/stage/stage-mover";
 import { STAGE_MOVER_DONE_HANDLER } from "./api/stage/stage-mover-done";
@@ -54,13 +54,17 @@ import { STAGE_MOVER_REVIEW_HANDLER } from "./api/stage/stage-mover-review";
 import { STAGE_MOVER_REVIEW_SEARCH_HANDLER } from "./api/stage/stage-mover-review-search";
 import { STAGE_MOVER_REVIEW_SELF_HANDLER } from "./api/stage/stage-mover-review-self";
 import { STAGE_MOVER_REVIEW_STATS_HANDLER } from "./api/stage/stage-mover-review-stats";
-import { IMAGE_REVIEW_HANDLER } from "./api/image-review";
-import { IMAGE_CHAT_HANDLER } from "./api/image-chat";
+import { IMAGE_REVIEW_HANDLER } from "./api/image/image-review";
+import { IMAGE_CHAT_HANDLER } from "./api/image/image-chat";
 import { SETTLEMENTS_STATS_HANDLER } from "./api/settlements-stats";
 import { SETTLEMENTS_HANDLER } from "./api/settlements";
 import { NOTIFICATION_HANDLER } from "./api/notification";
 import { NOTIFICATION_READ_HANDLER } from "./api/notification-read";
 import { NOTIFICATION_STATS_HANDLER } from "./api/notification-stats";
+import { BUSINESS_REVIEW_SUBMIT_HANDLER } from "./api/business-review-submit";
+import { BUSINESS_REVIEW_HANDLER } from "./api/business-review";
+import { BUSINESS_REVIEW_SEARCH_HANDLER } from "./api/business-review-search";
+import { IMAGE_BUSINESS_REVIEW_HANDLER } from "./api/image/image-business_review";
 
 /** .env 파일의 환경 변수를 process.env에 로드. */
 config();
@@ -125,6 +129,7 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
         new HTTPRouter("banner", IMAGE_BANNER_HANDLER),
         new HTTPRouter("review", IMAGE_REVIEW_HANDLER),
         new HTTPRouter("chat", IMAGE_CHAT_HANDLER),
+        new HTTPRouter("business-review", IMAGE_BUSINESS_REVIEW_HANDLER),
     ]),
     new HTTPRouter("issue", undefined, [
         new HTTPRouter("role-serial", ISSUE_ROLE_SERIAL_HANDLER)
@@ -170,6 +175,12 @@ const HTTP_ROUTER = new HTTPRouter("/", undefined, [
     new HTTPRouter("notification", NOTIFICATION_HANDLER, [
         new HTTPRouter("read", NOTIFICATION_READ_HANDLER),
         new HTTPRouter("stats", NOTIFICATION_STATS_HANDLER),
+    ]),
+    new HTTPRouter("business", undefined, [
+        new HTTPRouter("review", BUSINESS_REVIEW_HANDLER, [
+            new HTTPRouter("submit", BUSINESS_REVIEW_SUBMIT_HANDLER),
+            new HTTPRouter("search", BUSINESS_REVIEW_SEARCH_HANDLER),
+        ]),
     ]),
 ]);
 

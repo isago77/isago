@@ -1,5 +1,6 @@
 import { APIError } from "core";
 import { DB_CLIENT } from "../..";
+import { PoolConnection } from "mariadb/*";
 
 export enum UserRole {
     estimator = "estimator",
@@ -34,7 +35,7 @@ export class User {
     }
 
     /** 주어진 사용자 아이디를 기반으로 표시 이름을 조회하고 이를 반환합니다. */
-    static async displayNameOf(userId: string): Promise<UserRole | null> {
+    static async displayNameOf(userId: string): Promise<String | null> {
         const [row] = await DB_CLIENT.query(
             "SELECT displayName FROM User WHERE id = ? LIMIT 1",
             [userId]
@@ -42,5 +43,15 @@ export class User {
 
         if (!row) throw new Error("사용자의 표시 이름을 조회하는데 실패하였습니다.");
         return row.displayName;
+    }
+
+    /** 해당 사용자를 주어진 역할로 업데이트합니다. */
+    static async assignRole(
+        userId: String,
+        role: UserRole,
+        db: PoolConnection,
+    ) {
+        await db.query("UPDATE User SET role = ? WHERE id = ?", [role, userId]);
+        await db.query("INSERT IGNORE INTO UserDetails(`userId`) VALUES(?)", [userId]);
     }
 }

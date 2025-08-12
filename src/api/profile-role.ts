@@ -4,7 +4,7 @@ import z from "zod";
 import { DB_CLIENT, REDIS_CLIENT } from "..";
 import { API } from "core/src";
 import { IssueRoleSerialRequest } from "./issue-role_serial";
-import { UserError } from "./components/user";
+import { User, UserError, UserRole } from "./components/user";
 import { SQLTransaction } from "../sql/sql_transaction";
 
 /** 서버 측에서 정의한 역할에 대한 시리얼 키 정보에 대한 데이터 형태. */
@@ -27,8 +27,7 @@ export const PROFILE_ROLE_HANDLER = new HTTPHandler({
         
         // 조회된 시리얼 키 정보에 따라 사용자의 역할을 업데이트합니다.
         await SQLTransaction.perform(async (db) => {
-            await db.query("UPDATE User SET role = ? WHERE id = ?", [info.role, userId]);
-            await db.query("INSERT IGNORE INTO UserDetails(`userId`) VALUES(?)", [userId]);
+            await User.assignRole(userId, info.role as UserRole, db);
         });
 
         // 사용된 시리얼 키를 만료시킵니다.

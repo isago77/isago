@@ -3,7 +3,7 @@ import { API, APIError, HTTPHandler } from "core";
 import { Auth } from "./components/auth";
 import { DB_CLIENT } from "..";
 import { APISchema } from "./components/api_schema";
-import { SEARCH_MAX_COUNT, SQLSearcher } from "../sql/sql_searcher";
+import { SQLSearcher } from "../sql/sql_searcher";
 
 const ChatActiveGetRequest = z.object({
     cursor: APISchema.Search.cursor,

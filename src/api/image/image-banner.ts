@@ -1,7 +1,7 @@
 import { API, HTTPHandler } from "core";
-import { Auth } from "./components/auth";
-import { Assets } from "./components/assets";
-import { User, UserError } from "./components/user";
+import { Auth } from "../components/auth";
+import { Assets } from "../components/assets";
+import { User, UserError } from "../components/user";
 
 // image/banner
 export const IMAGE_BANNER_HANDLER = new HTTPHandler({

@@ -31,6 +31,7 @@ jobs:
             export COOLSMS_PHONE_NUMBER="${{ secrets.COOLSMS_PHONE_NUMBER }}"
             export ASSETS_SERVER_API_KEY="${{ secrets.ASSETS_SERVER_API_KEY }}"
             export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
+            export NTS_BUSINESS_API_KEY="${{ secrets.NTS_BUSINESS_API_KEY }}"
 
             echo "⚪ $COMMIT_SHA 저장소 불러오기"
             cd /home/$REMOTE_USERNAME/isago

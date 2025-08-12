@@ -1,6 +1,6 @@
 import { API, HTTPHandler } from "core";
-import { Auth } from "./components/auth";
-import { Assets } from "./components/assets";
+import { Auth } from "../components/auth";
+import { Assets } from "../components/assets";
 
 // image/review
 export const IMAGE_REVIEW_HANDLER = new HTTPHandler({

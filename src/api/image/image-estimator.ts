@@ -1,7 +1,7 @@
 import { API, HTTPHandler } from "core";
-import { Auth } from "./components/auth";
-import { Assets } from "./components/assets";
-import { User, UserError, UserRole } from "./components/user";
+import { Auth } from "../components/auth";
+import { Assets } from "../components/assets";
+import { User, UserError, UserRole } from "../components/user";
 
 // image/estimator
 export const IMAGE_ESTIMATOR_HANDLER = new HTTPHandler({
