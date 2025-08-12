@@ -26,3 +26,6 @@ CREATE TABLE `BusinessReview` (
     `cursor` BIGINT UNIQUE AUTO_INCREMENT,
     FOREIGN KEY (`userId`) REFERENCES `User`(`id`)
 );
+
+--changeset ttangkong:2
+ALTER TABLE `BusinessReview` ADD COLUMN `reason` TEXT;

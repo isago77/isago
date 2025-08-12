@@ -10,6 +10,7 @@ import { SQLTransaction } from "../sql/sql_transaction";
 const BusinessReviewRequest = z.object({
     uuid: APISchema.uuid,
     action: z.enum(["accept", "reject"]),
+    reason: z.string().optional(),
 });
 
 class BusinessReviewError {
@@ -45,8 +46,8 @@ export const BUSINESS_REVIEW_HANDLER = new HTTPHandler({
 
         await SQLTransaction.perform(async (db) => {
             await db.query(
-                "UPDATE BusinessReview SET status = ? WHERE id = ?",
-                [given.action == "accept" ? "accepted" : "rejected", given.uuid],
+                "UPDATE BusinessReview SET status = ?, reason = ? WHERE id = ?",
+                [given.action == "accept" ? "accepted" : "rejected", given.reason, given.uuid],
             );
 
             // 검토 결과에 따라 사용자의 역할을 업데이트합니다.
@@ -61,7 +62,12 @@ export const BUSINESS_REVIEW_HANDLER = new HTTPHandler({
                 ? "businessReviewAccepted"
                 : "businessReviewRejected",
 
-            data: JSON.stringify({uuid: given.uuid, reviewerId: userId}),
+            data: JSON.stringify({
+                uuid: given.uuid,
+                reviewerId: userId,
+                reason: given.reason,
+            }),
+
             body: given.action == "accept" ? {
                 title: "사업자 인증이 승인되었습니다",
                 body: "이제 관련 서비스를 정상적으로 이용하실 수 있습니다."
