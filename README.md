@@ -1,6 +1,5 @@
 > [!WARNING]
-> 🔒 Security Notice
-You might notice some exposed keys or credentials in the source code. Please note that this is an abandoned/archived repository for a project that was halted before launch. All corresponding cloud services and databases have been destroyed, so these keys are entirely dead and harmless. It remains public solely for architectural code review purposes.
+> 🔒 The `firebase-service-account.json` and config files remaining in this repository belong to a permanently disabled/dead Firebase project used solely during development. No active production keys or sensitive `.env` credentials exist here. It remains public strictly for architectural and code review purposes.
 
 # 정적 의존성
 
